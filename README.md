@@ -49,3 +49,6 @@ Système: conteneur docker </br>
     </ul>
   </ul>
 </ul>
+
+
+⚠️pour lire les mcd / mld utiliser https://app.diagrams.net/ ⚠️
