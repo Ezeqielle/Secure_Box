@@ -52,3 +52,8 @@ Système: conteneur docker </br>
 
 
 ⚠️pour lire les mcd / mld utiliser https://app.diagrams.net/ ⚠️
+
+
+## First time install
+
+    $> docker-compose up -d
