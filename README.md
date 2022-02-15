@@ -58,6 +58,6 @@ Système: conteneur docker </br>
 
     $> docker-compose up -d
     
-    # need to create manually the database to import tables
+    # need to create manually the database before import tables
     
     $> python database_schem.py
