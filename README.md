@@ -57,3 +57,7 @@ Système: conteneur docker </br>
 ## First time install
 
     $> docker-compose up -d
+    
+    # need to create manually the database to import tables
+    
+    $> python database_schem.py
