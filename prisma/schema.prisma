@@ -10,12 +10,57 @@ datasource db {
   url      = "mysql://root:root@localhost:3306/secureBox?charset=utf8&parseTime=True&loc=Local"
 }
 
-model User {
-  id             Int         @id @default(autoincrement())
-  discord_id     String      @unique
-  discord_name   String
-  blizzard_token String
-  status         Int         @default(1)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+model Users {
+  user_id             Int         @id @default(autoincrement())
+  user_name           String      
+  user_email          String      @unique
+  user_password       String
+  roles               Roles       @relation(fields: [role_id], references: [role_id])
+  role_id             Int         @unique
+  reports             Reports[]
 } 
+
+model Reports {
+  report_id           Int         @id @default(autoincrement())
+  report_name         String
+  report_date         DateTime
+  users               Users       @relation(fields: [user_id], references: [user_id])
+  user_id             Int         @unique
+}
+
+model Roles {
+  role_id             Int         @id @default(autoincrement())
+  role_name           String
+  users               Users?
+}
+
+model Hosts {
+  host_id             Int         @id @default(autoincrement())
+  host_name           String
+  host_ip             String
+  host_port           Int
+  host_os             String
+  host_mac_addr       String
+  host_status         String
+}
+
+model Vuln {
+  vuln_idd            Int         @id @default(autoincrement())
+  vuln_name           String
+  vuln_desc           String
+  vuln_criticality    String
+  vuln_date           DateTime
+  vuln_url            String
+  vuln_attack_vector  String
+  vuln_attack_complexity  String
+  vuln_impact_avaibility  String
+  vuln_impact_integrity  String
+}
+
+model Ports {
+  port_id             Int         @id @default(autoincrement())
+  port_number         Int
+  port_protocol       String
+  port_version        String
+  application_name    String
+}
