@@ -1,0 +1,21 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:root@localhost:3306/secureBox?charset=utf8&parseTime=True&loc=Local"
+}
+
+model User {
+  id             Int         @id @default(autoincrement())
+  discord_id     String      @unique
+  discord_name   String
+  blizzard_token String
+  status         Int         @default(1)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+} 
