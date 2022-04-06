@@ -26,6 +26,8 @@ model Reports {
   report_date         DateTime
   users               Users       @relation(fields: [user_id], references: [user_id])
   user_id             Int         @unique
+  host                Hosts[]
+  vuln                Vuln[]
 }
 
 model Roles {
@@ -42,6 +44,10 @@ model Hosts {
   host_os             String
   host_mac_addr       String
   host_status         String
+  report              Reports     @relation(fields: [report_id], references: [report_id])
+  report_id           Int         @unique
+  vuln                Vuln[]
+  ports               Ports[]
 }
 
 model Vuln {
@@ -54,7 +60,13 @@ model Vuln {
   vuln_attack_vector  String
   vuln_attack_complexity  String
   vuln_impact_avaibility  String
-  vuln_impact_integrity  String
+  vuln_impact_integrity   String
+  host                Hosts       @relation(fields: [hosts_id], references: [host_id])
+  hosts_id            Int         @unique
+  reports             Reports     @relation(fields: [report_id], references: [report_id])
+  report_id           Int         @unique
+  ports               Ports       @relation(fields: [port_id], references: [port_id])
+  port_id             Int         
 }
 
 model Ports {
@@ -63,4 +75,7 @@ model Ports {
   port_protocol       String
   port_version        String
   application_name    String
+  host                Hosts       @relation(fields: [host_id], references: [host_id])
+  host_id             Int
+  vuln                Vuln[]  
 }
