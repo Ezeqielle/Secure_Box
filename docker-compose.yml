@@ -3,9 +3,9 @@ services:
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
-    restart: alwaysœ
+    restart: always
     volumes:
-      - mysql_db_data_container:/var/lib/mysql
+      - "mysql_db_data_container:/var/lib/mysql"
     environment:
       MYSQL_ROOT_PASSWORD: example
 
@@ -18,8 +18,8 @@ services:
   cve_search:
     image: cve_search
     build:
-      context: .
-      dockerfile: CVE-Search-Docker/docker/images/cve_search/dockerfile-cve_search
+      context: ./CVE-Search-Docker
+      dockerfile: docker/images/cve_search/dockerfile-cve_search
       args:
         - REPO=cve-search/cve-search
         - BRANCH=master
@@ -42,8 +42,8 @@ services:
     hostname: redis
     restart: always
     build:
-      context: .
-      dockerfile: CVE-Search-Docker/docker/images/redis/dockerfile-redis
+      context: ./CVE-Search-Docker
+      dockerfile: docker/images/redis/dockerfile-redis
     volumes:
       - "./CVE-Search-Docker/.cve_search_data/cve_search_redis:/data"
     expose:
@@ -56,8 +56,8 @@ services:
     hostname: mongo
     restart: always
     build:
-      context: .
-      dockerfile: CVE-Search-Docker/docker/images/mongodb/dockerfile-mongo
+      context: ./CVE-Search-Docker
+      dockerfile: docker/images/mongodb/dockerfile-mongo
     volumes:
       - "./CVE-Search-Docker/.cve_search_data/cve_search_mongodb:/data/db"
     expose:
@@ -67,8 +67,8 @@ services:
 
   exploit-db:
     build:
-      context: .
-      dockerfile: ./go-exploitdb/Dockerfile
+      context: ./go-exploitdb
+      dockerfile: Dockerfile
     hostname: exploitDB
     command: server
     expose:
@@ -76,8 +76,8 @@ services:
     networks:
       - frontend
       - backend
-
-
+volumes:
+  mysql_db_data_container:
 networks:
   frontend:
   backend:
