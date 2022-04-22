@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:root@localhost:3306/secureBox?charset=utf8&parseTime=True&loc=Local"
+}
+
+model Users {
+  user_id             Int         @id @default(autoincrement())
+  user_name           String      
+  user_email          String      @unique
+  user_password       String
+  roles               Roles       @relation(fields: [role_id], references: [role_id])
+  role_id             Int         @unique
+  reports             Reports[]
+} 
+
+model Reports {
+  report_id           Int         @id @default(autoincrement())
+  report_name         String
+  report_date         DateTime
+  users               Users       @relation(fields: [user_id], references: [user_id])
+  user_id             Int         @unique
+  host                Hosts[]
+  vuln                Vuln[]
+}
+
+model Roles {
+  role_id             Int         @id @default(autoincrement())
+  role_name           String
+  users               Users?
+}
+
+model Hosts {
+  host_id             Int         @id @default(autoincrement())
+  host_name           String
+  host_ip             String
+  host_port           Int
+  host_os             String
+  host_mac_addr       String
+  host_status         String
+  report              Reports     @relation(fields: [report_id], references: [report_id])
+  report_id           Int         @unique
+  vuln                Vuln[]
+  ports               Ports[]
+}
+
+model Vuln {
+  vuln_idd            Int         @id @default(autoincrement())
+  vuln_name           String
+  vuln_desc           String
+  vuln_criticality    String
+  vuln_date           DateTime
+  vuln_url            String
+  vuln_attack_vector  String
+  vuln_attack_complexity  String
+  vuln_impact_avaibility  String
+  vuln_impact_integrity   String
+  host                Hosts       @relation(fields: [hosts_id], references: [host_id])
+  hosts_id            Int         @unique
+  reports             Reports     @relation(fields: [report_id], references: [report_id])
+  report_id           Int         @unique
+  ports               Ports       @relation(fields: [port_id], references: [port_id])
+  port_id             Int         
+}
+
+model Ports {
+  port_id             Int         @id @default(autoincrement())
+  port_number         Int
+  port_protocol       String
+  port_version        String
+  application_name    String
+  host                Hosts       @relation(fields: [host_id], references: [host_id])
+  host_id             Int
+  vuln                Vuln[]  
+}
