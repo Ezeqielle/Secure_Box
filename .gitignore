@@ -1,3 +1,4 @@
 CVE-Search-Docker
 go-exploitdb
 vuln-scanner/node_modules
+.DS_Store
