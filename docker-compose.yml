@@ -88,19 +88,31 @@ services:
       backend:
         ipv4_address: 10.21.22.9
   
-  vuln-scanner:
-    hostname: vulnScanner
+  vuln-scanner-frontend:
+    hostname: vulnScannerFront
     restart: always
     build:
-      context: ./vuln-scanner
+      context: ./vuln-scanner/frontend
       dockerfile: Dockerfile
     ports:
-      - 8080:5050
+      - 80:80
     networks:
       frontend:
         ipv4_address: 10.20.21.10
+  
+  vuln-scanner-backend:
+    hostname: vulnScannerBack
+    restart: always
+    build:
+      context: ./vuln-scanner/backend
+      dockerfile: Dockerfile
+    ports:
+      - 8080:3000
+    networks:
+      frontend:
+        ipv4_address: 10.20.21.11
       backend:
-        ipv4_address: 10.21.22.10
+        ipv4_address: 10.21.22.11
 
 volumes:
   mysql_db_data_container:
