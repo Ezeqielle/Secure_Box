@@ -95,7 +95,7 @@ services:
       context: ./vuln-scanner/frontend
       dockerfile: Dockerfile
     ports:
-      - 80:80
+      - 443:443
     networks:
       frontend:
         ipv4_address: 10.20.21.10
@@ -107,7 +107,7 @@ services:
       context: ./vuln-scanner/backend
       dockerfile: Dockerfile
     ports:
-      - 8080:3000
+      - 3000:3000
     networks:
       frontend:
         ipv4_address: 10.20.21.11
