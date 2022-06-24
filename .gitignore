@@ -1,5 +1,7 @@
 CVE-Search-Docker
 go-exploitdb
 vuln-scanner/*/node_modules
+vuln-scanner/*/build
+*.env*
 .DS_Store
 test*

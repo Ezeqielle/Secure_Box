@@ -31,7 +31,7 @@ import './assets/bootstrap/css/bootstrap.min.css';
 import './assets/fonts/fontawesome-all.min.css';
 import './assets/fonts/font-awesome.min.css';
 import './assets/fonts/fontawesome5-overrides.min.css';
-
+console.log(process.env.REACT_APP_HOST_IP)
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
