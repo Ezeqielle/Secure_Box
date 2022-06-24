@@ -7,8 +7,8 @@ import {
 } from "react-router-dom";
 
 // Route components
-import UserNavbar from './components/UserNavbar';
-import Home from './components/Home';
+import BaseHome from './components/BaseHome';
+import HomeDashboard from './components/HomeDashboard';
 import Profile from './components/Profile';
 import AccountsManagement from './components/AccountsManagement';
 import Login from './components/Login';
@@ -23,10 +23,6 @@ import Scan from './components/Scan';
 import Vulnerability from './components/Vulnerability';
 import VulnerabilitiesList from './components/VulnerabilitiesList';
 
-// Default render
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-
 import reportWebVitals from './reportWebVitals';
 
 // CSS
@@ -39,35 +35,22 @@ import './assets/fonts/fontawesome5-overrides.min.css';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
-    <div id="wrapper">
-      <Navbar />
-      <div className="d-flex flex-column" id="content-wrapper">
         <Routes>
-          <Route path="/" element={<UserNavbar childComponent={<Home />} />} />
-          <Route path="/profile" element={<UserNavbar childComponent={<Profile />} />} />
-          <Route path="/accountsmanagement" element={<UserNavbar childComponent={<AccountsManagement />} />} />
-          <Route path="/login" element={<UserNavbar childComponent={<Login />} />} />
-          <Route path="/register" element={<UserNavbar childComponent={<Register />} />} />
-          <Route path="/forgotpassword" element={<UserNavbar childComponent={<ForgotPassword />} />} />
-          <Route path="/pagenotfound" element={<UserNavbar childComponent={<NotFound404 />} />} />
-          <Route path="/scancreation" element={<UserNavbar childComponent={<ScanCreation />} />} />
-          <Route path="/projectcreation" element={<UserNavbar childComponent={<ProjectCreation />} />} />
-          <Route path="/projectdashboard" element={<UserNavbar childComponent={<ProjectDashboard />} />} />
-          <Route path="/accountedit" element={<UserNavbar childComponent={<AccountEdit />} />} />
-          <Route path="/scan" element={<UserNavbar childComponent={<Scan />} />} />
-          <Route path="/vulnerability" element={<UserNavbar childComponent={<Vulnerability />} />} />
-          <Route path="/vulnerabilitiesList" element={<UserNavbar childComponent={<VulnerabilitiesList />} />} />
+          <Route path="/" element={<BaseHome childComponent={<HomeDashboard />} />} />
+          <Route path="/profile" element={<BaseHome childComponent={<Profile />} />} />
+          <Route path="/accountsmanagement" element={<BaseHome childComponent={<AccountsManagement />} />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/pagenotfound" element={<NotFound404 />} />
+          <Route path="/scancreation" element={<BaseHome childComponent={<ScanCreation />} />} />
+          <Route path="/projectcreation" element={<BaseHome childComponent={<ProjectCreation />} />} />
+          <Route path="/projectdashboard" element={<BaseHome childComponent={<ProjectDashboard />} />} />
+          <Route path="/accountedit" element={<BaseHome childComponent={<AccountEdit />} />} />
+          <Route path="/scan" element={<BaseHome childComponent={<Scan />} />} />
+          <Route path="/vulnerability" element={<BaseHome childComponent={<Vulnerability />} />} />
+          <Route path="/vulnerabilitiesList" element={<BaseHome childComponent={<VulnerabilitiesList />} />} />
         </Routes>
-        <Footer />
-      </div>
-      <a className="border rounded d-inline scroll-to-top" href="#page-top">
-        <i className="fas fa-angle-up"></i>
-      </a>
-    </div>
-    <script src="./assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="./assets/js/chart.min.js"></script>
-    <script src="./assets/js/bs-init.js"></script>
-    <script src="./assets/js/theme.js"></script>
   </BrowserRouter>
 );
 

@@ -1,4 +1,10 @@
-const UserNavbar = ({childComponent}) => (
+import Navbar from "./Navbar";
+import Footer from "./Footer";
+
+const BaseHome = ({childComponent}) => (
+    <div id="wrapper">
+      <Navbar />
+      <div className="d-flex flex-column" id="content-wrapper">
         <div id="content">
             <nav className="navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
                 <div className="container-fluid"><button className="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button"><i className="fas fa-bars"></i></button>
@@ -59,6 +65,12 @@ const UserNavbar = ({childComponent}) => (
             </nav>
             {childComponent}
         </div>
+        <Footer />
+      </div>
+      <a className="border rounded d-inline scroll-to-top" href="#page-top">
+        <i className="fas fa-angle-up"></i>
+      </a>
+    </div>
     )
 
-export default UserNavbar;
+export default BaseHome;
