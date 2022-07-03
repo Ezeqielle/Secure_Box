@@ -33,30 +33,12 @@ const Navbar = () => (
             <span>Accounts</span>
           </Link>
         </li>
-        <li className="nav-item">
-          <Link to="/login" className="nav-link">
-            <i className="far fa-user-circle"></i>
-            <span>Login</span>
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/register" className="nav-link">
-            <i className="fas fa-user-circle"></i>
-            <span>Register</span>
-          </Link>
-        </li>
-        <li className="nav-item">
+        {/* <li className="nav-item">
           <Link to="/forgotpassword" className="nav-link">
             <i className="fas fa-key"></i>
             <span>Forgotten Password</span>
           </Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/pagenotfound" className="nav-link" >
-            <i className="fas fa-exclamation-circle"></i>
-            <span>Page Not Found</span>
-          </Link>
-        </li>
+        </li> */}
         <li className="nav-item">
           <Link to="/scancreation" className="nav-link">
             <i className="fas fa-window-maximize"></i>

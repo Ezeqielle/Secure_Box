@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {
+  Navigate,
   BrowserRouter,
   Routes,
   Route,
@@ -40,14 +41,15 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
         <Routes>
+          <Route path="*" element={<Navigate to="notfound"/>} />
           <Route path="/" element={<BaseHome childComponent={<HomeDashboard />} />} />
           <Route path="/profile" element={<BaseHome childComponent={<Profile />} />} />
           <Route path="/accountsmanagement" element={<BaseHome childComponent={<AccountsManagement />} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/forgotpassword" element={<ForgotPassword />} />
-          <Route path="/pagenotfound" element={<NotFound404 />} />
+          {/* <Route path="/forgotpassword" element={<ForgotPassword />} /> */}
+          <Route path="/notfound" element={<NotFound404 />} />
           <Route path="/scancreation" element={<BaseHome childComponent={<ScanCreation />} />} />
           <Route path="/projectcreation" element={<BaseHome childComponent={<ProjectCreation />} />} />
           <Route path="/projectdashboard" element={<BaseHome childComponent={<ProjectDashboard />} />} />
