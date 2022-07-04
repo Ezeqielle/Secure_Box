@@ -1,7 +1,7 @@
 import { SERVER_PORT } from './config';
 
 export async function postFetch(bodyData, url){
-    return fetch('https://' + process.env.REACT_APP_HOST_IP + ':' + SERVER_PORT + url, {
+    return fetch('https://' + "localhost"/* process.env.REACT_APP_HOST_IP  */+ ':' + SERVER_PORT + url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -17,7 +17,7 @@ export async function getFetch(queryData, url){
 
         queryString += `${item[0]}=${item[1]}&`
     }
-    return fetch('https://' + process.env.REACT_APP_HOST_IP + ':' + SERVER_PORT + url +queryString, {
+    return fetch('https://' + "localhost"/* process.env.REACT_APP_HOST_IP */ + ':' + SERVER_PORT + url +queryString, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

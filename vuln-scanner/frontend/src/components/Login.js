@@ -13,6 +13,7 @@ const Login = () => {
 
     const handleSubmit = async e => {
         e.preventDefault();
+        console.log("Test")
         const res = await postFetch({
             username,
             password

@@ -167,7 +167,8 @@ app.post('/editUser', async (req, res) => {
     const reqUserInfo = await checkToken(reqUsername, reqToken)
 
     if (reqUserInfo.isTokenValid) {
-      if (reqUserInfo.userRole == USER_ADMIN_ROLE || reqUsername == username) { // LOL
+      if (reqUserInfo.userRole == USER_ADMIN_ROLE || reqUsername == username) {
+        if(reqUsername == username) role = reqUserInfo.userRole;
         // Check if user already exists
         db.query('SELECT * FROM Users WHERE user_name = ? OR user_email = ?', [username, email], (error, results) => {
           // If there is an issue with the query, output the error
@@ -191,7 +192,9 @@ app.post('/editUser', async (req, res) => {
             db.query(queryString, queryArray, (error) => {
               // If there is an issue with the query, output the error
               if (error) throw error;
-
+              JSON_RES.data = { username: reqUsername, token: reqToken }
+              res.status(201)
+              res.json(JSON_RES);
               res.end();
             });
 
@@ -241,6 +244,85 @@ app.get('/checkToken', (req, res) => {
       }
       res.end();
     });
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+})
+
+app.get('/getUserInfo', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  if (req.query.reqUsername != undefined && req.query.reqToken != undefined && req.query.username != undefined) {
+    const reqUsername = req.query.reqUsername
+    const username = req.query.username
+    const reqToken = req.query.reqToken
+
+    const reqUserInfo = await checkToken(reqUsername, reqToken)
+    if (reqUserInfo.isTokenValid) {
+      if (reqUserInfo.userRole == USER_ADMIN_ROLE || reqUsername == username) {
+        db.query('SELECT * FROM Users WHERE user_name = ?', [username], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+          if (results.length > 0) {
+            JSON_RES.data = { user: results[0] }
+            res.json(JSON_RES);
+          } else {
+            JSON_RES.error = { errorMsg: "User does not exist" }
+            res.status(404)
+            res.json(JSON_RES);
+          }
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not admin" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+})
+
+app.get('/getAllUsers', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  if (req.query.token != undefined && req.query.token != undefined) {
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE) {
+        db.query('SELECT user_name, user_email, role_id FROM Users', (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+          JSON_RES.data = { users: results }
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not admin" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
   } else {
     JSON_RES.error = { errorMsg: "Bad parameters" }
     res.status(400)

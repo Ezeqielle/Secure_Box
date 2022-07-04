@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import Session from 'react-session-api'
+Session.config(true, 60)
 
 const Navbar = () => (
   <nav className="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
@@ -22,7 +24,7 @@ const Navbar = () => (
           </Link>
         </li>
         <li className="nav-item">
-          <Link to="/profile" className="nav-link">
+          <Link to={"/accountedit/"+Session.get("username")} className="nav-link">
             <i className="fas fa-user"></i>
             <span>Profile</span>
           </Link>
@@ -51,10 +53,6 @@ const Navbar = () => (
           <Link to="/projectdashboard" className="nav-link">
             <i className="fas fa-window-maximize"></i>
             <span>Project Dashboard</span>
-          </Link>
-          <Link to="/accountedit" className="nav-link">
-            <i className="fas fa-window-maximize"></i>
-            <span>Account Edit</span>
           </Link>
           <Link to="/scan" className="nav-link">
             <i className="fas fa-window-maximize"></i>
