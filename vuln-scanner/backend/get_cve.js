@@ -50,18 +50,18 @@ db.cpe.aggregate([
     {
         $match: {
             $or: [{
-                product: mb.regex.contains("openssh")
+                product: mb.regex.contains("openssh") // TO CHANGE BY VARIABLE
             }, {
-                vendor: mb.regex.contains("openssh")
+                vendor: mb.regex.contains("openssh") // TO CHANGE BY VARIABLE
             }],
             $and: [{
                 $or: [{
-                    "cpe_2_2": /:5.8:/
+                    "cpe_2_2": /:5.8:/ // TO CHANGE BY VARIABLE
                 },{
-                    "cpe_name.cpe23Uri": /:5.8:/
+                    "cpe_name.cpe23Uri": /:5.8:/ // TO CHANGE BY VARIABLE
                 }]
             }, {
-                cpe_2_2: mb.regex.contains("")
+                cpe_2_2: mb.regex.contains("") // TO CHANGE BY VARIABLE
             }
             ]
         }
