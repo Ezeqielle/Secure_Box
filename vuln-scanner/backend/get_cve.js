@@ -1,9 +1,12 @@
 const { MongoClient } = require("mongodb");
+const { fs } = require("fs");
 // Connection URI
 
 const hostname = "10.21.22.8";
 const port = "27017";
 const uri = `mongodb://${hostname}:${port}/?authSource=admin`;
+
+let output;
 
 
 // Create a new MongoClient
@@ -13,7 +16,6 @@ async function getCVE(prmProduct, prmVersion,) {
     try {
         const db = client.db("cvedb");
         const collection = db.collection("cpe");
-        prmVersion = ":" + prmVersion + ":";
         const result = await collection.aggregate([
             {
                 $unwind: "$cpe_name"
@@ -28,10 +30,10 @@ async function getCVE(prmProduct, prmVersion,) {
                     }],
                     $and: [{
                         $or: [{
-                            "cpe_2_2": //TODO
+                            "cpe_2_2": new RegExp(':' + prmVersion + ':')
                         },
                         {
-                            "cpe_name.cpe23Uri": //TODO
+                            "cpe_name.cpe23Uri": new RegExp(':' + prmVersion + ':')
                         }]
                     }, 
                     {
@@ -66,7 +68,7 @@ async function getCVE(prmProduct, prmVersion,) {
                 $group: { _id: "$cves.id", data: {$first: "$cves"}}
             }
         ]).toArray();
-        console.log(result);
+        output = result;
     } catch {
         console.error("Error reading data from DB");
     }
@@ -80,6 +82,8 @@ async function run() {
     console.log("Connected successfully to Mongo");
 
     await getCVE("openssh", "5.4");
+    let dataFormatted = JSON.stringify(output, null, 2);
+    console.log(dataFormatted)
   } catch {
     console.error("Error connecting to Mongo");
   } finally {
