@@ -9,10 +9,11 @@ const uri = `mongodb://${hostname}:${port}/?authSource=admin`;
 // Create a new MongoClient
 const client = new MongoClient(uri);
 
-async function getCVE(prmProduct, prmVendor) {
+async function getCVE(prmProduct, prmVersion,) {
     try {
         const db = client.db("cvedb");
         const collection = db.collection("cpe");
+        prmVersion = ":" + prmVersion + ":";
         const result = await collection.aggregate([
             {
                 $unwind: "$cpe_name"
@@ -20,17 +21,17 @@ async function getCVE(prmProduct, prmVendor) {
             {
                 $match: {
                     $or: [{
-                        product: /openssh/
+                        product: new RegExp(prmProduct, 'i')
                     },
                     {
-                        vendor: /openssh/
+                        vendor: new RegExp(prmProduct, 'i')
                     }],
                     $and: [{
                         $or: [{
-                            "cpe_2_2": /:5.8:/
+                            "cpe_2_2": //TODO
                         },
                         {
-                            "cpe_name.cpe23Uri": /:5.8:/
+                            "cpe_name.cpe23Uri": //TODO
                         }]
                     }, 
                     {
@@ -78,7 +79,7 @@ async function run() {
     await client.db("admin").command({ ping: 1 });
     console.log("Connected successfully to Mongo");
 
-    await getCVE("openssh", "openssh");
+    await getCVE("openssh", "5.4");
   } catch {
     console.error("Error connecting to Mongo");
   } finally {
