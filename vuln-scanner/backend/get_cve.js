@@ -12,7 +12,7 @@ let output;
 // Create a new MongoClient
 const client = new MongoClient(uri);
 
-async function getCVE(prmProduct, prmVersion,) {
+async function getCVE(prmProduct, prmVersion, prmService) {
     try {
         const db = client.db("cvedb");
         const collection = db.collection("cpe");
@@ -23,10 +23,10 @@ async function getCVE(prmProduct, prmVersion,) {
             {
                 $match: {
                     $or: [{
-                        product: new RegExp(prmProduct, 'i')
+                        "product": new RegExp(prmProduct, 'i')
                     },
                     {
-                        vendor: new RegExp(prmProduct, 'i')
+                        "vendor": new RegExp(prmProduct, 'i')
                     }],
                     $and: [{
                         $or: [{
@@ -37,7 +37,7 @@ async function getCVE(prmProduct, prmVersion,) {
                         }]
                     }, 
                     {
-                        //cpe_2_2: //TO WORK ON
+                        "cpe_2_2": new RegExp(prmService, 'i')
                     }]
                 }
             }, 
@@ -50,7 +50,7 @@ async function getCVE(prmProduct, prmVersion,) {
             },
             {
                 $group: {
-                    _id: "$cpe_name.cpe23Uri"
+                    "_id": "$cpe_name.cpe23Uri"
                 }
             },
             {
@@ -81,7 +81,7 @@ async function run() {
     await client.db("admin").command({ ping: 1 });
     console.log("Connected successfully to Mongo");
 
-    await getCVE("openssh", "5.4");
+    await getCVE("apache", "2.4.1");
     let dataFormatted = JSON.stringify(output, null, 2);
     console.log(dataFormatted)
   } catch {
