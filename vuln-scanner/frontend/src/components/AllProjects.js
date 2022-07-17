@@ -1,20 +1,19 @@
 import { getFetch } from '../utils/functions';
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from 'react';
+import { Link } from "react-router-dom";
+import { BoxArrowUpRight } from 'react-bootstrap-icons';
 import Session from 'react-session-api'
-import { PencilSquare, PersonCircle } from 'react-bootstrap-icons';
-import { useNavigate, Link } from "react-router-dom";
 
 Session.config(true, 60)
 
-const AccountManagement = () => {
-    const [users, setUsers] = useState([]);
+const AllProjects = () => {
 
-    const ROLES = ["Admin", "Reader", "Scan"]
+    const [allProjects, setAllPorjects] = useState([]);
 
-    const getAllUsers = async () => {
-        const allUsers = await getFetch({ username: Session.get("username"), token: Session.get("token") }, "/getAllUsers")
-        
-        setUsers(allUsers.data.users)
+    const getAllProjects = async () => {
+        const projectInfo = await getFetch({ username: Session.get("username"), token: Session.get("token") }, "/getAllProjects")
+        setAllPorjects(projectInfo.data.projects)
     }
 
     let navigate = useNavigate();
@@ -25,16 +24,16 @@ const AccountManagement = () => {
             return navigate("/login");
         }
 
-        getAllUsers()
+        getAllProjects()
 
     }, []);
 
     return (
         <div className="container-fluid">
-            <h3 className="text-dark mb-4">Manage accounts</h3>
+            <h3 className="text-dark mb-4">All Projects</h3>
             <div className="card shadow">
                 <div className="card-header py-3">
-                    <p className="text-primary m-0 fw-bold">Employee Info</p>
+                    <p className="text-primary m-0 fw-bold">Project List</p>
                 </div>
                 <div className="card-body">
                     <div className="row">
@@ -49,25 +48,20 @@ const AccountManagement = () => {
                         <table className="table my-0" id="dataTable">
                             <thead>
                                 <tr>
-                                    <th>Username</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
+                                    <th>Name</th>
+                                    <th>Creation Date</th>
                                     <th className="text-center">Edit</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.map((user, i) => (
+                                {allProjects.map((project, i) => (
                                     <tr key={i}>
-                                        <td><PersonCircle /> {user.user_name}</td>
-                                        <td>{user.user_email}</td>
-                                        <td>{ROLES[user.role_id-1] != undefined ? ROLES[user.role_id-1]: "None" }</td>
-                                        <td className="text-center"><Link to={"/accountedit/"+user.user_name}><PencilSquare /></Link></td>
+                                        <td> {project.report_name}</td>
+                                        <td>{project.report_date}</td>
+                                        <td className="text-center"><Link to={"/projectdashboard/" + project.report_id}><BoxArrowUpRight /></Link></td>
                                     </tr>
                                 ))}
                             </tbody>
-                            <tfoot>
-                                <tr></tr>
-                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -76,4 +70,4 @@ const AccountManagement = () => {
     )
 }
 
-export default AccountManagement;
+export default AllProjects;

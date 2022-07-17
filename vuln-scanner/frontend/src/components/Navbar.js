@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import Session from 'react-session-api'
+Session.config(true, 60)
 
 const Navbar = () => (
   <nav className="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
@@ -22,7 +24,7 @@ const Navbar = () => (
           </Link>
         </li>
         <li className="nav-item">
-          <Link to="/profile" className="nav-link">
+          <Link to={"/accountedit/"+Session.get("username")} className="nav-link">
             <i className="fas fa-user"></i>
             <span>Profile</span>
           </Link>
@@ -33,50 +35,20 @@ const Navbar = () => (
             <span>Accounts</span>
           </Link>
         </li>
-        <li className="nav-item">
-          <Link to="/login" className="nav-link">
-            <i className="far fa-user-circle"></i>
-            <span>Login</span>
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/register" className="nav-link">
-            <i className="fas fa-user-circle"></i>
-            <span>Register</span>
-          </Link>
-        </li>
-        <li className="nav-item">
+        {/* <li className="nav-item">
           <Link to="/forgotpassword" className="nav-link">
             <i className="fas fa-key"></i>
             <span>Forgotten Password</span>
           </Link>
-        </li>
+        </li> */}
         <li className="nav-item">
-          <Link to="/pagenotfound" className="nav-link" >
-            <i className="fas fa-exclamation-circle"></i>
-            <span>Page Not Found</span>
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/scancreation" className="nav-link">
-            <i className="fas fa-window-maximize"></i>
-            <span>Scan Creation</span>
-          </Link>
           <Link to="/projectcreation" className="nav-link">
             <i className="fas fa-window-maximize"></i>
             <span>Project Creation</span>
           </Link>
-          <Link to="/projectdashboard" className="nav-link">
+          <Link to="/allprojects" className="nav-link">
             <i className="fas fa-window-maximize"></i>
-            <span>Project Dashboard</span>
-          </Link>
-          <Link to="/accountedit" className="nav-link">
-            <i className="fas fa-window-maximize"></i>
-            <span>Account Edit</span>
-          </Link>
-          <Link to="/scan" className="nav-link">
-            <i className="fas fa-window-maximize"></i>
-            <span>scan</span>
+            <span>All Projects</span>
           </Link>
           <Link to="/vulnerability" className="nav-link">
             <i className="fas fa-window-maximize"></i>
