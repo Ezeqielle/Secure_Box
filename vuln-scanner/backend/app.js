@@ -12,6 +12,8 @@ const httpsOptions = {
 };
 
 const USER_ADMIN_ROLE = 1
+const USER_READER_ROLE = 3
+const USER_SCAN_ROLE = 3
 
 app.use(express.json());
 app.use(cors())
@@ -35,14 +37,16 @@ db.connect(function (err) {
 
 // ------------------------------------------------------------FUNCTIONS----------------------------------------------
 
-const checkToken = async (username, token) => {
+const checkToken = async (username, token, userId = -1) => {
   return new Promise((resolve, reject) => {
-    db.query('SELECT * FROM Users WHERE user_name = ? AND user_token = ?', [username, token], (error, results) => {
+    db.query('SELECT * FROM Users WHERE (user_name = ? OR user_id = ?) AND user_token = ?', [username, userId, token], (error, results) => {
       if (error) {
         return reject(error);
       }
-      let userTokenInfo = { userRole: -1, isTokenValid: false }
+      let userTokenInfo = { userId: -1, username: "", userRole: -1, isTokenValid: false }
       if (results.length > 0) {
+        userTokenInfo.userId = results[0].user_id
+        userTokenInfo.username = results[0].user_name
         userTokenInfo.userRole = results[0].role_id
         userTokenInfo.isTokenValid = true
       }
@@ -52,7 +56,7 @@ const checkToken = async (username, token) => {
 }
 
 app.get("/", async (req, res) => {
-  res.json({data: "Welcome"});
+  res.json({ data: "Welcome" });
 });
 
 // ------------------------------------------------------------USER_ROUTES----------------------------------------------------
@@ -121,7 +125,7 @@ app.post('/createUser', (req, res) => {
           1000, 64, `sha512`).toString(`hex`);
 
         // Execute SQL query that'll create new user
-        db.query('INSERT INTO Users ( user_name, user_email, user_password) VALUES (?, ?, ?)', [username, email, password], (error) => {
+        db.query('INSERT INTO Users ( user_name, user_email, user_password, role_id) VALUES (?, ?, ?, ?)', [username, email, password, USER_READER_ROLE], (error) => {
           // If there is an issue with the query, output the error
           if (error) throw error;
 
@@ -168,7 +172,7 @@ app.post('/editUser', async (req, res) => {
 
     if (reqUserInfo.isTokenValid) {
       if (reqUserInfo.userRole == USER_ADMIN_ROLE || reqUsername == username) {
-        if(reqUsername == username) role = reqUserInfo.userRole;
+        if (reqUsername == username) role = reqUserInfo.userRole;
         // Check if user already exists
         db.query('SELECT * FROM Users WHERE user_name = ? OR user_email = ?', [username, email], (error, results) => {
           // If there is an issue with the query, output the error
@@ -254,25 +258,26 @@ app.get('/checkToken', (req, res) => {
 
 app.get('/getUserInfo', async (req, res) => {
   var JSON_RES = { data: {}, error: {} }
-  if (req.query.reqUsername != undefined && req.query.reqToken != undefined && req.query.username != undefined) {
+  if (req.query.reqUsername != undefined && req.query.reqToken != undefined && (req.query.username != undefined || req.query.userId != undefined)) {
     const reqUsername = req.query.reqUsername
-    const username = req.query.username
     const reqToken = req.query.reqToken
+    const username = req.query.username
+    const userId = req.query.userId
 
     const reqUserInfo = await checkToken(reqUsername, reqToken)
     if (reqUserInfo.isTokenValid) {
       if (reqUserInfo.userRole == USER_ADMIN_ROLE || reqUsername == username) {
-        db.query('SELECT * FROM Users WHERE user_name = ?', [username], (error, results) => {
+        db.query('SELECT * FROM Users WHERE user_name = ? OR user_id = ?', [username, userId], (error, results) => {
           // If there is an issue with the query, output the error
           if (error) throw error;
+
           if (results.length > 0) {
             JSON_RES.data = { user: results[0] }
-            res.json(JSON_RES);
           } else {
             JSON_RES.error = { errorMsg: "User does not exist" }
             res.status(404)
-            res.json(JSON_RES);
           }
+          res.json(JSON_RES);
           res.end();
         });
       } else {
@@ -297,7 +302,7 @@ app.get('/getUserInfo', async (req, res) => {
 
 app.get('/getAllUsers', async (req, res) => {
   var JSON_RES = { data: {}, error: {} }
-  if (req.query.token != undefined && req.query.token != undefined) {
+  if (req.query.username != undefined && req.query.token != undefined) {
     const username = req.query.username
     const token = req.query.token
 
@@ -330,6 +335,308 @@ app.get('/getAllUsers', async (req, res) => {
     res.end();
   }
 })
+
+// ------------------------------------------------------------REPORTS_ROUTES----------------------------------------------------
+app.post('/createProject', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.body != undefined && req.body.username != undefined && req.body.token != undefined && req.body.reportName != undefined) {
+
+    // Capture the input fields
+    const reportName = req.body.reportName;
+    const username = req.body.username
+    const token = req.body.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE) {
+        let insertDatetime = new Date();
+        // Create new project
+        db.query('INSERT INTO Reports (report_name, user_id, report_date) VALUES (?, ?, ?)', [reportName, userInfo.userId, insertDatetime.toISOString().split(".")[0]], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          JSON_RES.data = { reportName: reportName, reportId: results.insertId }
+          res.status(201)
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not admin" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+app.get('/getProjectInfo', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.reportId != undefined) {
+
+    // Capture the input fields
+    const reportId = req.query.reportId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE) {
+        // Select report
+        db.query('SELECT * FROM Reports WHERE report_id = ?', [reportId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { reportId, reportName: results[0].report_name, reportDate: results[0].report_date, userId: results[0].user_id }
+            res.status(200)
+          } else {
+            JSON_RES.error = { errorMsg: "Project does not exist" }
+            res.status(404)
+          }
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+app.get('/getAllProjects', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined) {
+
+    // Capture the input fields
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Select report
+        db.query('SELECT * FROM Reports', (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { projects: results }
+            res.status(200)
+          } else {
+            JSON_RES.error = { errorMsg: "No Projects" }
+            res.status(404)
+          }
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+// ------------------------------------------------------------SCANS_ROUTES----------------------------------------------------
+
+app.post('/createScan', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.body != undefined && req.body.username != undefined && req.body.token != undefined && req.body.scanName != undefined && req.body.scanTarget != undefined && req.body.scanType != undefined && req.body.reportId != undefined) {
+
+
+    // Capture the input fields
+    const scanName = req.body.scanName;
+    const scanTarget = req.body.scanTarget;
+    const scanType = req.body.scanType;
+    const reportId = req.body.reportId;
+    const username = req.body.username
+    const token = req.body.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Create new project
+        db.query('INSERT INTO Scans (scan_name, scan_target, scan_type_id, report_id) VALUES (?, ?, ?, ?)', [scanName, scanTarget, scanType, reportId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          JSON_RES.data = { scanName: scanName, scanId: results.insertId }
+          res.status(201)
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+app.get('/getScan', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.scanId != undefined) {
+
+    // Capture the input fields
+    const scanId = req.query.scanId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Select report
+        db.query('SELECT * FROM Scans WHERE scan_id = ?', [scanId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { scan: results[0] }
+            res.status(200)
+          } else {
+            JSON_RES.error = { errorMsg: "Scan does not exist" }
+            res.status(404)
+          }
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+app.get('/getProjectScans', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.reportId != undefined) {
+
+    // Capture the input fields
+    const reportId = req.query.reportId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE) {
+        // Select report
+        db.query('SELECT * FROM Scans WHERE report_id = ?', [reportId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { scans: results }
+            res.status(200)
+          } else {
+            JSON_RES.error = { errorMsg: "No Scans found" }
+            res.status(404)
+          }
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
 
 const PORT = process.env.PORT || 3000;
 

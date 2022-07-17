@@ -24,6 +24,7 @@ import AccountEdit from './components/AccountEdit';
 import Scan from './components/Scan';
 import Vulnerability from './components/Vulnerability';
 import VulnerabilitiesList from './components/VulnerabilitiesList';
+import AllProjects from './components/AllProjects';
 
 import reportWebVitals from './reportWebVitals';
 
@@ -50,11 +51,12 @@ root.render(
           <Route path="/register" element={<Register />} />
           {/* <Route path="/forgotpassword" element={<ForgotPassword />} /> */}
           <Route path="/notfound" element={<NotFound404 />} />
-          <Route path="/scancreation" element={<BaseHome childComponent={<ScanCreation />} />} />
+          <Route path="/scancreation/:projectId" element={<BaseHome childComponent={<ScanCreation />} />} />
           <Route path="/projectcreation" element={<BaseHome childComponent={<ProjectCreation />} />} />
-          <Route path="/projectdashboard" element={<BaseHome childComponent={<ProjectDashboard />} />} />
+          <Route path="/projectdashboard/:projectId" element={<BaseHome childComponent={<ProjectDashboard />} />} />
+          <Route path="/allprojects" element={<BaseHome childComponent={<AllProjects />} />} />
           <Route path="/accountedit/:searcheduser" element={<BaseHome childComponent={<AccountEdit />} />} />
-          <Route path="/scan" element={<BaseHome childComponent={<Scan />} />} />
+          <Route path="/scan/:scanId" element={<BaseHome childComponent={<Scan />} />} />
           <Route path="/vulnerability" element={<BaseHome childComponent={<Vulnerability />} />} />
           <Route path="/vulnerabilitiesList" element={<BaseHome childComponent={<VulnerabilitiesList />} />} />
         </Routes>

@@ -42,21 +42,13 @@ const Navbar = () => (
           </Link>
         </li> */}
         <li className="nav-item">
-          <Link to="/scancreation" className="nav-link">
-            <i className="fas fa-window-maximize"></i>
-            <span>Scan Creation</span>
-          </Link>
           <Link to="/projectcreation" className="nav-link">
             <i className="fas fa-window-maximize"></i>
             <span>Project Creation</span>
           </Link>
-          <Link to="/projectdashboard" className="nav-link">
+          <Link to="/allprojects" className="nav-link">
             <i className="fas fa-window-maximize"></i>
-            <span>Project Dashboard</span>
-          </Link>
-          <Link to="/scan" className="nav-link">
-            <i className="fas fa-window-maximize"></i>
-            <span>scan</span>
+            <span>All Projects</span>
           </Link>
           <Link to="/vulnerability" className="nav-link">
             <i className="fas fa-window-maximize"></i>
