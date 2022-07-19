@@ -1,6 +1,6 @@
 const { exec } = require("child_process");
 
-function exec_code(repport, ipRange) {
+function execCode(repport, ipRange) {
 
     let cmd = "nmap -v -sS -p- -sV 9 -PR -O -oX res.xml " + ipRange;
     exec(cmd, (error, stdout,stderr) => {
