@@ -53,7 +53,7 @@ fs.readFile('res.json', (err, data) => {
 
                     let port_protocol = target[i].ports.port[x]['@_protocol'];
                     let port_id = target[i].ports.port[x]['@_portid'];
-                    if(addrMac === 'NULL') {
+                    if(addrMac === '') {
                         addrMac = 'NULL';
                     }
 
