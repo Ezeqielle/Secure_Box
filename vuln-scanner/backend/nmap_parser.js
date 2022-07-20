@@ -85,7 +85,6 @@ function json2db(repport) {
                 }
 
                 let host_os = target[i].os.osmatch['@_name'];
-                        
                 if(typeof host_os === 'undefined') {
                     host_os = 'NULL';
                 } else {

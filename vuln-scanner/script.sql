@@ -7,16 +7,16 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 SET NAMES utf8mb4;
 
-CREATE DATABASE `secure_box` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `secure_box`;
+DROP DATABASE IF EXISTS `secureBox`;
+CREATE DATABASE `secureBox` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `secureBox`;
 
 DROP TABLE IF EXISTS `Hosts`;
 CREATE TABLE `Hosts` (
   `host_id` int NOT NULL AUTO_INCREMENT,
-  `host_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `host_ip` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `host_os` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `host_mac_addr` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_mac` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `host_status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `report_id` int NOT NULL,
   PRIMARY KEY (`host_id`),
@@ -131,22 +131,4 @@ CREATE TABLE `Vuln` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-DROP TABLE IF EXISTS `_prisma_migrations`;
-CREATE TABLE `_prisma_migrations` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `checksum` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `finished_at` datetime(3) DEFAULT NULL,
-  `migration_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `logs` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `rolled_back_at` datetime(3) DEFAULT NULL,
-  `started_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `applied_steps_count` int unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_name`, `logs`, `rolled_back_at`, `started_at`, `applied_steps_count`) VALUES
-('0524c43e-ffba-490f-8c7b-644a0b4fb764',	'79bf8cc1dcf7051d81318c343a969243b2c594d79900f8d233bd6497047c5eea',	'2022-04-04 13:17:45.474',	'20220404131745_init',	NULL,	NULL,	'2022-04-04 13:17:45.463',	1),
-('16c14bb4-c05f-429b-be1e-736da47d90be',	'd29f5c00cd195fec9c442267aee63113fa3648cebcb491cef70ebdf7c97588cd',	'2022-04-05 16:55:26.810',	'20220405165526_add_tables',	NULL,	NULL,	'2022-04-05 16:55:26.736',	1),
-('a692655a-ca46-4e81-adca-3f011b5032f4',	'c979ffc66bb78e185423a5f9056c796748877317db37ea8cd92a4cddf93cc473',	'2022-04-06 14:06:21.115',	'20220406140620_update_schem',	NULL,	NULL,	'2022-04-06 14:06:20.974',	1);
-
--- 2022-07-20 10:20:07
+-- 2022-07-20 21:14:52
