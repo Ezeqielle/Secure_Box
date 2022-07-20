@@ -7,12 +7,14 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 SET NAMES utf8mb4;
 
+CREATE DATABASE `secure_box` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `secure_box`;
+
 DROP TABLE IF EXISTS `Hosts`;
 CREATE TABLE `Hosts` (
   `host_id` int NOT NULL AUTO_INCREMENT,
   `host_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `host_ip` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `host_port` int NOT NULL,
   `host_os` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `host_mac_addr` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `host_status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -28,8 +30,9 @@ CREATE TABLE `Ports` (
   `port_id` int NOT NULL AUTO_INCREMENT,
   `port_number` int NOT NULL,
   `port_protocol` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `port_version` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `application_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `service_version` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `service_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `service_product` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `host_id` int NOT NULL,
   PRIMARY KEY (`port_id`),
   KEY `Ports_host_id_fkey` (`host_id`),
@@ -67,6 +70,7 @@ CREATE TABLE `ScanTypes` (
   `scan_type_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`scan_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 DROP TABLE IF EXISTS `Scans`;
 CREATE TABLE `Scans` (
@@ -145,4 +149,4 @@ INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_na
 ('16c14bb4-c05f-429b-be1e-736da47d90be',	'd29f5c00cd195fec9c442267aee63113fa3648cebcb491cef70ebdf7c97588cd',	'2022-04-05 16:55:26.810',	'20220405165526_add_tables',	NULL,	NULL,	'2022-04-05 16:55:26.736',	1),
 ('a692655a-ca46-4e81-adca-3f011b5032f4',	'c979ffc66bb78e185423a5f9056c796748877317db37ea8cd92a4cddf93cc473',	'2022-04-06 14:06:21.115',	'20220406140620_update_schem',	NULL,	NULL,	'2022-04-06 14:06:20.974',	1);
 
--- 2022-07-14 18:11:20
+-- 2022-07-20 10:20:07
