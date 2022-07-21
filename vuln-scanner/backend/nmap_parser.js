@@ -132,9 +132,8 @@ function json2db(repport) {
                         });
 
                         let port_id = "";
-                        db.query('Select host_id from host where host_ip = ? and port_number = ?', [addrIp, port_number], (error, results) => {
+                        db.query('Select host_id from host where host_id = ? and port_number = ?', [host_id, port_number], (error, results) => {
                             if(error) throw error;
-                            host_id = results[0].host_id;
                             port_id = results[0].port_id;
                         });
                         
