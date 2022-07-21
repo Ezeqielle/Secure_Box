@@ -131,10 +131,24 @@ function json2db(repport) {
                             console.log("Port ajouté à la base de données MySQL!");
                         });
 
-                        console.log(`addrMac: ${addrMac} || addrIp: ${addrIp} || status: ${stat} || service_name: ${service_name} || port_number: ${port_number} || port_protocol: ${port_protocol} || service_product: ${service_product} || service_version: ${service_version}`);
+                        let port_id = "";
+                        db.query('Select host_id from host where host_ip = ? and port_number = ?', [addrIp, port_number], (error, results) => {
+                            if(error) throw error;
+                            host_id = results[0].host_id;
+                            port_id = results[0].port_id;
+                        });
+                        
+                        // prepare version for api call
+                        if(service_version.indexOf('X') > -1) {
+                            service_version = service_version.split('X')[0];
+                        }
+
+                        call_api_martin(port_id, service_name, service_product, service_version);
+
+                        //console.log(`addrMac: ${addrMac} || addrIp: ${addrIp} || status: ${stat} || service_name: ${service_name} || port_number: ${port_number} || port_protocol: ${port_protocol} || service_product: ${service_product} || service_version: ${service_version}`);
                     }
                 } 
-                console.log('-----')  
+                //console.log('-----')  
             }
         }
     });
