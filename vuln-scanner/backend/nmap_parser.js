@@ -16,7 +16,7 @@ db.connect(function (err) {
 });
 
 // Command execution //
-function execCode(repport, ipRange) {
+function execCode(scanId, ipRange,) {
 
     let cmd = "nmap -v -sS -p- -sV 9 -PR -O -oX res.xml " + ipRange;
     exec(cmd, (error, stdout,stderr) => {
@@ -43,11 +43,11 @@ function execCode(repport, ipRange) {
         console.log(`stdout: ${stdout}`);
     });
 
-    json2db(repport);
+    json2db(scanId);
 }
 
 // Parsing JSON to DB //
-function json2db(repport) {
+function json2db(scanId) {
     fs.readFile('res.json', (err, data) => {
         if(err) throw err;
         let result = JSON.parse(data);
@@ -92,14 +92,10 @@ function json2db(repport) {
                     host_os = host_os[0];
                 }
                 
-                db.query('INSERT INTO host (host_ip, host_os, host_mac, host_status, repport_id) VALUES (?, ?)', [addrIp, host_os, addrMac, stat, repport], (error) => {
+                db.query('INSERT INTO host (host_ip, host_os, host_mac, host_status, scan_id) VALUES (?, ?)', [addrIp, host_os, addrMac, stat, scanId], (error, result) => {
                     if(error) throw error;
                     console.log("Host ajouté à la base de données MySQL!");
-                });
-
-                db.query('Select host_id from host where host_ip = ?', [addrIp], (error, results) => {
-                    if(error) throw error;
-                    host_id = results[0].host_id;
+                    host_id = result.insertid;
                 });
 
                 if(typeof target[i].ports !== 'undefined') {
@@ -125,18 +121,14 @@ function json2db(repport) {
 
                         let port_protocol = target[i].ports.port[x]['@_protocol'];
                         let port_number = target[i].ports.port[x]['@_portid'];
+                        let port_id = "";
 
                         db.query('INSERT INTO port (port_protocol, port_number, service_name, service_product, service_version, host_id) VALUES (?, ?, ?, ?, ?, ?)', [port_protocol, port_number, service_name, service_product, service_version, host_id], (error) => {
                             if(error) throw error;
                             console.log("Port ajouté à la base de données MySQL!");
+                            port_id = result.insertid;
                         });
 
-                        let port_id = "";
-                        db.query('Select host_id from host where host_id = ? and port_number = ?', [host_id, port_number], (error, results) => {
-                            if(error) throw error;
-                            port_id = results[0].port_id;
-                        });
-                        
                         // prepare version for api call
                         if(service_version.indexOf('X') > -1) {
                             service_version = service_version.split('X')[0];

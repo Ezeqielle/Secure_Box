@@ -7,6 +7,10 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 SET NAMES utf8mb4;
 
+DROP DATABASE IF EXISTS `secureBox`;
+CREATE DATABASE `secureBox` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `secureBox`;
+
 DROP TABLE IF EXISTS `Hosts`;
 CREATE TABLE `Hosts` (
   `host_id` int NOT NULL AUTO_INCREMENT,
@@ -14,10 +18,10 @@ CREATE TABLE `Hosts` (
   `host_os` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `host_mac` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `host_status` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `report_id` int NOT NULL,
+  `scan_id` int NOT NULL,
   PRIMARY KEY (`host_id`),
-  UNIQUE KEY `Hosts_report_id_key` (`report_id`),
-  CONSTRAINT `Hosts_report_id_fkey` FOREIGN KEY (`report_id`) REFERENCES `Reports` (`report_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  UNIQUE KEY `Hosts_report_id_key` (`scan_id`),
+  CONSTRAINT `Hosts_report_id_fkey` FOREIGN KEY (`scan_id`) REFERENCES `Reports` (`report_id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -127,4 +131,4 @@ CREATE TABLE `Vuln` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- 2022-07-21 10:18:21
+-- 2022-07-21 15:24:57
