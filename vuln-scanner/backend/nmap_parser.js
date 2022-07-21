@@ -52,7 +52,7 @@ function json2db(repport) {
         if(err) throw err;
         let result = JSON.parse(data);
         let target = result.nmaprun.host
-        console.log(target.length)   
+        //console.log(target.length)   
         for(let i = 0; i < target.length; i++) {
             let stat = target[i].status['@_state'];
             if(stat == 'up') {
@@ -74,7 +74,7 @@ function json2db(repport) {
                 } else {
                     if(target[i].address['@_addr'] === 'ipv4') {
                         addrIp = target[i].address['@_addr'];
-                        console.log(addr)
+                        //console.log(addr)
                     } else {
                         addrIp = target[i].address['@_addr'];
                     }
