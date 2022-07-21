@@ -5,3 +5,5 @@ vuln-scanner/*/build
 *.env*
 .DS_Store
 test*
+vuln-scanner/backend/*.json
+vuln-scanner/backend/*.xml
