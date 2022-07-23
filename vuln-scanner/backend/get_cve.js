@@ -46,7 +46,7 @@ async function uploadToDatabase(prmPortId, prmCVES) {
     db.end();
 }
 
-async function getCVE(prmProduct, prmVersion, prmService) {
+async function getCVE(prmProduct, prmVersion, prmService, prmPortId) {
     try {
         const db = client.db("cvedb");
         const collection = db.collection("cpe");
@@ -104,7 +104,7 @@ async function getCVE(prmProduct, prmVersion, prmService) {
         ]).toArray();
         data = result
         dataFormatted = JSON.stringify(data, null, 2);
-        uploadToDatabase("1", dataFormatted);
+        uploadToDatabase(prmPortId, dataFormatted);
     } catch {
         console.error("Error reading data from DB");
     }
