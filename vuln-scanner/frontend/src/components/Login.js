@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { postFetch } from '../utils/functions';
+import { Link } from "react-router-dom";
 import dogImage from '../assets/img/dogs/image3.jpeg';
 import Session from 'react-session-api'
 import { useNavigate } from "react-router-dom";
@@ -64,8 +65,8 @@ const Login = () => {
                                             </div><button className="btn btn-primary d-block btn-user w-100" type="submit">Login</button>
                                             <hr />
                                         </form>
-                                        <div className="text-center"><a className="small" href="forgot-password.html">Forgot Password?</a></div>
-                                        <div className="text-center"><a className="small" href="register.html">Create an Account!</a></div>
+                                        <div className="text-center"><p>Forgot Password ? Please contact your administrator</p></div>
+                                        <div className="text-center"><Link to="/register" className="small">Create an Account!</Link></div>
                                     </div>
                                 </div>
                             </div>
