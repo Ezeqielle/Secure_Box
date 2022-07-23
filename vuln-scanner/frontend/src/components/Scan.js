@@ -1,5 +1,12 @@
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import { getFetch, postFetch } from '../utils/functions';
+import Button from 'react-bootstrap/Button';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from "react-router-dom";
+import Session from 'react-session-api'
+
+Session.config(true, 60)
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -28,10 +35,51 @@ export const data = {
   ],
 };
 
-const Scan = () => (
+const Scan = () => {
+
+    const SCAN_TYPES = ["Aggressive", "Normal"]
+
+    const [scanName, setScanName] = useState("Scan Name");
+    const [scanTarget, setScanTarget] = useState("");
+    const [scanStartDate, setScanStartDate] = useState("None");
+    const [scanEndDate, setScanEndDate] = useState("None");
+    const [scanType, setScanType] = useState("");
+    const [userName, setUserName] = useState("");
+    const [projectScans, setProjectScans] = useState([]);
+
+    let { scanId } = useParams();
+
+    const startScan = async () => {
+        const res = await postFetch({username: Session.get("username"), token: Session.get("token"), scanId, scanTarget}, "/startScan")
+        setScanStartDate(res.data.scanStartDate)
+        console.log(res)
+    }
+
+    const getScanInfo = async () => {
+        const scanInfo = await getFetch({ username: Session.get("username"), token: Session.get("token"), scanId }, "/getScan")
+        setScanName(scanInfo.data.scan.scan_name)
+        setScanTarget(scanInfo.data.scan.scan_target)
+        setScanStartDate(scanInfo.data.scan.scan_start_date)
+        setScanEndDate(scanInfo.data.scan.scan_end_date)
+        setScanType(SCAN_TYPES[scanInfo.data.scan.scan_type_id-1])
+    }
+
+    let navigate = useNavigate();
+
+    useEffect(() => {
+
+        if (Session.get("username") == undefined || Session.get("token") == undefined) {
+            return navigate("/login");
+        }
+
+        getScanInfo()
+
+    }, []);
+    
+    return (
     <div className="container-fluid">
         <div className="d-sm-flex justify-content-between align-items-center mb-4">
-            <h3 className="text-dark mb-0"><span className="badge rounded-pill bg-secondary">IP</span><span className="badge rounded-pill bg-secondary">Network</span>&nbsp;Scan name</h3>
+            <h3 className="text-dark mb-0">&nbsp;Scan name</h3><Button variant="outline-success" onClick={startScan}>Start Scan</Button>
         </div>
         <div className="row">
             <div className="col-md-6 col-xl-3 mb-4">
@@ -109,37 +157,35 @@ const Scan = () => (
                         <form>
                             <div className="row">
                                 <div className="col">
+                                    <div className="mb-3"><label className="form-label" htmlFor="username"><strong>Name</strong></label>
+                                        <p>{scanName}</p>
+                                    </div>
+                                </div>
+                                <div className="col">
                                     <div className="mb-3"><label className="form-label" htmlFor="username"><strong>Type of scan&nbsp;&nbsp;</strong></label>
-                                        <p>Passive</p>
-                                        <p></p>
+                                        <p>{scanType}</p>
                                     </div>
                                 </div>
                                 <div className="col">
                                     <div className="mb-3"><label className="form-label" htmlFor="username"><strong>Duration</strong></label>
-                                        <p>Paragraph</p>
-                                    </div>
-                                </div>
-                                <div className="col">
-                                    <div className="mb-3"><label className="form-label" htmlFor="username"><strong>Creation</strong></label>
-                                        <p>Paragraph</p>
+                                        <p>{scanStartDate <= scanEndDate ? "None": scanStartDate-scanEndDate}</p>
                                     </div>
                                 </div>
                             </div>
                             <div className="row">
                                 <div className="col">
-                                    <div className="mb-3"><label className="form-label" htmlFor="username"><strong>IP</strong></label>
-                                        <p>127.0.0.1</p>
+                                    <div className="mb-3"><label className="form-label" htmlFor="username"><strong>Target</strong></label>
+                                        <p>{scanTarget}</p>
                                     </div>
                                 </div>
                                 <div className="col">
                                     <div className="mb-3"><label className="form-label" htmlFor="username"><strong>Start Date</strong></label>
-                                        <p>24/01/2022 21h06</p>
-                                        <p></p>
+                                        <p>{scanStartDate == null ? "Scan not started yet": scanStartDate}</p>
                                     </div>
                                 </div>
                                 <div className="col">
                                     <div className="mb-3"><label className="form-label" htmlFor="username"><strong>End Date</strong></label>
-                                        <p>24/01/2022 21h07<br /></p>
+                                        <p>{scanEndDate == null ? "Scan not ended yet": scanEndDate}<br /></p>
                                     </div>
                                 </div>
                             </div>
@@ -285,13 +331,13 @@ const Scan = () => (
                         </div>
                     </div>
                     <div className="card-body">
-                        <div className="chart-area"><Pie data={data} /></div>
+                        <div><Pie data={data} /></div>
                         <div className="text-center small mt-4"><span className="me-2"><i className="fas fa-circle" style={{ color: "#252525" }}></i>&nbsp;Critical</span><span className="me-2"><i className="fas fa-circle" style={{ color: "var(--bs-red)" }}></i>&nbsp;High</span><span className="me-2"><i className="fas fa-circle" style={{ color: "var(--bs-orange)" }}></i>&nbsp;Medium</span><span className="me-2"><i className="fas fa-circle" style={{ color: "var(--bs-yellow)" }}></i>&nbsp;Low</span><span className="me-2"><i className="fas fa-circle text-info"></i>&nbsp;Info</span></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-)
+)}
 
 export default Scan;

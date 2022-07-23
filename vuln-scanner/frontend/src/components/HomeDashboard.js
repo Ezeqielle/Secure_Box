@@ -262,7 +262,7 @@ const HomeDashboard = () => (
             </div>
           </div>
           <div className="card-body">
-            <div className="chart-area">
+            <div>
               <Pie data={data} />
             </div>
             <div className="text-center small mt-4">
