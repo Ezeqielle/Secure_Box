@@ -5,6 +5,8 @@ const app = express();
 const mysql = require('mysql');
 var cors = require('cors')
 const crypto = require('crypto');
+const nmapParser = require('./nmapParser')
+const { exec } = require("child_process");
 
 const httpsOptions = {
   key: fs.readFileSync('key.pem'),
@@ -18,8 +20,6 @@ const USER_SCAN_ROLE = 3
 app.use(express.json());
 app.use(cors())
 app.use(express.urlencoded({ extended: false }));
-
-
 
 const db = mysql.createConnection({
 
@@ -57,6 +57,23 @@ const checkToken = async (username, token, userId = -1) => {
 
 app.get("/", async (req, res) => {
   res.json({ data: "Welcome" });
+});
+app.get("/test", (req, res) => {
+  let cmd = `nmap -v -sS -p- -sV 9 -PR -O -oX test-res.xml 192.168.1.42`;
+    exec(cmd, (error, stdout,stderr) => {
+        if(error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if(stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+        res.json({ data: "scanning" });
+        res.end()
+    });
+    
 });
 
 // ------------------------------------------------------------USER_ROUTES----------------------------------------------------
@@ -455,11 +472,11 @@ app.get('/getAllProjects', async (req, res) => {
 
           if (results.length > 0) {
             JSON_RES.data = { projects: results }
-            res.status(200)
           } else {
+            JSON_RES.data = { projects: [] }
             JSON_RES.error = { errorMsg: "No Projects" }
-            res.status(404)
           }
+          res.status(200)
           res.json(JSON_RES);
           res.end();
         });
@@ -602,17 +619,17 @@ app.get('/getProjectScans', async (req, res) => {
     if (userInfo.isTokenValid) {
       if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE) {
         // Select report
-        db.query('SELECT * FROM Scans WHERE report_id = ?', [reportId], (error, results) => {
+        db.query('SELECT * FROM Scans WHERE report_id = ? ', [reportId], (error, results) => {
           // If there is an issue with the query, output the error
           if (error) throw error;
 
           if (results.length > 0) {
             JSON_RES.data = { scans: results }
-            res.status(200)
           } else {
+            JSON_RES.data = { scans: [] }
             JSON_RES.error = { errorMsg: "No Scans found" }
-            res.status(404)
           }
+          res.status(200)
           res.json(JSON_RES);
           res.end();
         });
@@ -629,6 +646,54 @@ app.get('/getProjectScans', async (req, res) => {
       res.end();
     }
 
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+app.post('/startScan', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.body != undefined && req.body.username != undefined && req.body.token != undefined && req.body.scanId != undefined && req.body.scanTarget != undefined) {
+
+
+    // Capture the input fields
+    const scanId = req.body.scanId;
+    const scanTarget = req.body.scanTarget;
+    const username = req.body.username
+    const token = req.body.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        let scanDatetime = new Date();
+        // Create new project
+        db.query('UPDATE Scans SET scan_start_date = ? WHERE scan_id = ?', [scanDatetime.toISOString().split(".")[0], scanId], (error) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+          nmapParser.execCode(scanId, scanTarget, db)
+          JSON_RES.data = { scanStartDate: scanDatetime.toISOString().split(".")[0] }
+          res.status(200)
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
   } else {
     JSON_RES.error = { errorMsg: "Bad parameters" }
     res.status(400)
