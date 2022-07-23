@@ -4,6 +4,82 @@ import { useNavigate, useParams } from "react-router-dom";
 import { BoxArrowUpRight } from 'react-bootstrap-icons';
 import { Link } from "react-router-dom";
 import Session from 'react-session-api'
+import { Line, Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
+
+export const options = {
+    responsive: true,
+    plugins: {
+        legend: {
+            position: 'top',
+        },
+    },
+};
+
+const labels = ['Scan_1', 'Scan_2', 'Scan_3', 'Scan_4', 'Scan_5', 'Scan_6', 'Scan_7'];
+
+export const dataLine = {
+    labels,
+    datasets: [
+        {
+            label: 'Critical',
+            data: [30, 20, 15, 9, 5, 3, 2],
+            borderColor: 'rgb(139, 0, 0)',
+            backgroundColor: 'rgba(139, 0, 0, 0.5)',
+        },
+        {
+            label: 'High',
+            data: [20, 10, 5, 4, 2, 0, 0],
+            borderColor: 'rgb(135, 206, 235)',
+            backgroundColor: 'rgba(135, 206, 235, 0.5)',
+        },
+        {
+            label: 'Medium',
+            data: [30, 23, 16, 10, 7, 7, 5],
+            borderColor: 'rgb(255, 165, 0)',
+            backgroundColor: 'rgba(255, 165, 0, 0.5)',
+        },
+        {
+            label: 'Low',
+            data: [23, 15, 6, 0, 0, 0, 0],
+            borderColor: 'rgb(144, 238, 144)',
+            backgroundColor: 'rgba(144, 238, 144, 0.5)',
+        },
+    ],
+};
+
+export const dataBar = {
+    labels,
+    datasets: [
+        {
+            label: 'All vulnerabilities',
+            data: [103, 68, 42, 23, 14, 10, 7],
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        },
+    ],
+};
 
 Session.config(true, 60)
 
@@ -33,9 +109,9 @@ const ProjectDashboard = () => {
 
     useEffect(() => {
 
-        if (Session.get("username") == undefined || Session.get("token") == undefined) {
+        /*if (Session.get("username") == undefined || Session.get("token") == undefined) {
             return navigate("/login");
-        }
+        }*/
 
         getProjectInfo()
 
@@ -118,9 +194,42 @@ const ProjectDashboard = () => {
                         </div>
                     </div>
                 </div>
+                <div className="col-lg-12 mb-1">
+                    <div className="card shadow mb-4">
+                        <div className="card-header d-flex justify-content-between align-items-center">
+                            <h6 className="text-primary fw-bold m-0">Vulnerabilities resolved</h6>
+                            <div className="dropdown no-arrow"><button className="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button"><i className="fas fa-ellipsis-v text-gray-400"></i></button>
+                                <div className="dropdown-menu shadow dropdown-menu-end animated--fade-in">
+                                    <p className="text-center dropdown-header">dropdown header:</p><a className="dropdown-item" href="#">&nbsp;Action</a><a className="dropdown-item" href="#">&nbsp;Another action</a>
+                                    <div className="dropdown-divider"></div><a className="dropdown-item" href="#">&nbsp;Something else here</a>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div className="container">
+                            <div className="row">
+                                <div className="col-lg-6 mb-4">
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <Line data={dataLine} options={options} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-lg-6 mb-4">
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <Bar data={dataBar} options={options} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )
 }
+
 
 export default ProjectDashboard;
