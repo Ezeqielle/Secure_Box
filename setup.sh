@@ -6,6 +6,5 @@
 echo REACT_APP_HOST_IP=$(ip route get 1.2.3.4 | awk '{print $7}') > vuln-scanner/frontend/.env
 
 git clone https://github.com/cve-search/CVE-Search-Docker.git
-git clone https://github.com/vulsio/go-exploitdb.git
 
 docker-compose up

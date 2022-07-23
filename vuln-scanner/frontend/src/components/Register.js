@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { postFetch } from '../utils/functions';
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Session from 'react-session-api'
 import dogImage from '../assets/img/dogs/image2.jpeg';
 
@@ -59,12 +60,8 @@ const Register = () => {
                                 <div className="text-center">
                                     <h4 className="text-dark mb-4">Create an Account!</h4>
                                 </div>
-                                <p>Create your account and contact your administrator to be attached to your entity.</p>
-                                <div className="alert alert-danger" role="alert"><span><strong>Attention you have not filled in the form correctly.</strong><br /></span>
-                                    <ul style={{ margin: 0 }}>
-                                        <li>Password must be 8-100 chars long.</li>
-                                    </ul>
-                                </div>
+                                <p>Create your account and contact your administrator to be attached to your role.</p>
+                                
                                 <form className="user" onSubmit={handleSubmit}>
                                     <div className="mb-3"><input className="form-control form-control-user" type="text" id="exampleInputUsername" aria-describedby="emailHelp" placeholder="Username" name="username" onChange={e => setUserName(e.target.value)} /></div>
                                     <div className="mb-3"><input className="form-control form-control-user" type="email" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Email Address" name="email" onChange={e => setEmail(e.target.value)} /></div>
@@ -74,8 +71,7 @@ const Register = () => {
                                     </div><button className="btn btn-primary d-block btn-user w-100" type="submit">Register Account</button>
                                     <hr />
                                 </form>
-                                <div className="text-center"><a className="small" href="forgot-password.html">Forgot Password?</a></div>
-                                <div className="text-center"><a className="small" href="login.html">Already have an account? Login!</a></div>
+                                <div className="text-center"><Link to="/login" className="small">Already have an account? Login!</Link></div>
                             </div>
                         </div>
                     </div>

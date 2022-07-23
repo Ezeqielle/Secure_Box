@@ -163,61 +163,6 @@ const AccountEdit = () => {
         <div className="w-100"></div>
       </div>
       <div className="card shadow mb-5">
-        <div className="card-header py-3">
-          <p className="text-primary m-0 fw-bold">Assets</p>
-        </div>
-        <div className="card-body">
-          <div className="row">
-            <div className="col-md-12 col-lg-12 col-xl-12">
-              <div className="table-responsive">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Application</th>
-                      <th>Host</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr style={{ width: "886px" }}>
-                      <td>Cell 1</td>
-                      <td>127.0.0.1</td>
-                      <td className="text-primary d-xl-flex" style={{ textAlign: "right" }}><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link d-xl-flex" style={{ borderColor: "var(--bs-blue)", color: "var(--bs-blue)", fontSize: "22px" }}>
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                        <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                        <line x1="10" y1="14" x2="20" y2="4"></line>
-                        <polyline points="15 4 20 4 20 9"></polyline>
-                      </svg><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-trash d-xl-flex" style={{ borderColor: "var(--bs-blue)", color: "var(--bs-red)", fontSize: "22px" }}>
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                          <line x1="4" y1="7" x2="20" y2="7"></line>
-                          <line x1="10" y1="11" x2="10" y2="17"></line>
-                          <line x1="14" y1="11" x2="14" y2="17"></line>
-                          <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
-                          <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
-                        </svg></td>
-                    </tr>
-                    <tr>
-                      <td>Cell 1</td>
-                      <td>Cell 3</td>
-                      <td className="text-primary d-xl-flex" style={{ textAlign: "right" }}><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link d-xl-flex" style={{ borderColor: "var(--bs-blue)", color: "var(--bs-blue)", fontSize: "22px" }}>
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                        <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                        <line x1="10" y1="14" x2="20" y2="4"></line>
-                        <polyline points="15 4 20 4 20 9"></polyline>
-                      </svg><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-trash d-xl-flex" style={{ borderColor: "var(--bs-blue)", color: "var(--bs-danger)", fontSize: "22px" }}>
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                          <line x1="4" y1="7" x2="20" y2="7"></line>
-                          <line x1="10" y1="11" x2="10" y2="17"></line>
-                          <line x1="14" y1="11" x2="14" y2="17"></line>
-                          <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
-                          <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
-                        </svg></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
         <button className="btn btn-primary d-block btn-user w-100" type="submit" onClick={handleSubmit}>Save</button>
       </div>
     </div>

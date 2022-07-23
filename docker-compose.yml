@@ -74,16 +74,16 @@ services:
     networks:
       backend:
         ipv4_address: 10.21.22.8
-
+        
   exploit-db:
-    build:
-      context: ./go-exploitdb
-      dockerfile: Dockerfile
-    hostname: exploitDB
-    restart: always
-    command: server
-    expose:
-      - 1326
+    image: vuls/go-exploitdb
+    restart: unless-stopped
+    ports:
+      - 1326:1326
+    command: server --debug --bind 0.0.0.0
+    volumes:
+      - ./vuls:/go-exploitdb
+      - ./vuls-log:/var/log/vuls
     networks:
       backend:
         ipv4_address: 10.21.22.9

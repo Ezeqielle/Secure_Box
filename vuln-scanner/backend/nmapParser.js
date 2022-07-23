@@ -1,5 +1,5 @@
 const fs = require('fs');
-//const { exec } = require("child_process");
+const getCVE = require('./getCVE')
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const { XMLParser } = require('fast-xml-parser');
@@ -74,28 +74,43 @@ function json2db(scanId, db) {
                     
                     if (target[i].ports !== undefined) {
                         const host_id = result.insertId
-                        let service_product
-                        let service_version
-                        let service_name
-                        let port_protocol
-                        let port_number
                         for (let x = 0; x < target[i].ports.port.length; x++) {
 
                             if (target[i].ports.port[x].service !== undefined) {
-                                service_product = target[i].ports.port[x].service['@_product'] === undefined ? "None" : target[i].ports.port[x].service['@_product'];
-                                service_version = target[i].ports.port[x].service['@_version'] === undefined ? "None" : target[i].ports.port[x].service['@_version'];
-                                service_name = target[i].ports.port[x].service['@_name'] === undefined ? "None" : target[i].ports.port[x].service['@_name'];
-                                port_protocol = target[i].ports.port[x]['@_protocol'];
-                                port_number = target[i].ports.port[x]['@_portid'];
-                                
+                                let service_product = target[i].ports.port[x].service['@_product'] === undefined ? "" : target[i].ports.port[x].service['@_product'];
+                                let service_version = target[i].ports.port[x].service['@_version'] === undefined ? "" : target[i].ports.port[x].service['@_version'];
+                                let service_name = target[i].ports.port[x].service['@_name'] === undefined ? "" : target[i].ports.port[x].service['@_name'];
+                                let port_protocol = target[i].ports.port[x]['@_protocol'];
+                                let port_number = target[i].ports.port[x]['@_portid'];
+
                                 db.query('INSERT INTO Ports (port_protocol, port_number, service_name, service_product, service_version, host_id) VALUES (?, ?, ?, ?, ?, ?)', [port_protocol, port_number, service_name, service_product, service_version, host_id], (error, result) => {
                                     if (error) throw error
                                     const port_id = result.insertId
 
+                                    service_product = service_name.split(' ')[0].toLowerCase()
+                                    service_version = service_version.split(' ')[0]
+
                                     if (service_version.indexOf('X') > -1) {
                                         service_version = service_version.split('X')[0];
-                                        //call_api_martin(port_id, service_name, service_product, service_version);
                                     }
+                                    if(target[i].ports.port[x].service.cpe !== undefined){
+                                        let cpe
+                                        if (Array.isArray(target[i].ports.port[x].service.cpe)) {
+                                            cpe = target[i].ports.port[x].service.cpe[0]
+                                        }else{
+                                            cpe = target[i].ports.port[x].service.cpe
+                                        }
+                                        cpeArray = cpe.split(":")
+                                        if(cpeArray.length === 5){
+                                            service_product = cpeArray[2]
+                                            service_version = cpeArray[4]
+                                            service_name = cpeArray[3]
+                                        }
+                                    }
+                                    
+
+                                    //console.log(`product: ${service_product}, version: ${service_version}, name: ${service_name}, port_id: ${port_id}`)
+                                    getCVE.getCVE(service_product, service_version, service_name, port_id, db)
                                 });
                             }
                         }

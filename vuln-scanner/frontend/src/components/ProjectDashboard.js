@@ -109,9 +109,9 @@ const ProjectDashboard = () => {
 
     useEffect(() => {
 
-        /*if (Session.get("username") == undefined || Session.get("token") == undefined) {
+        if (Session.get("username") == undefined || Session.get("token") == undefined) {
             return navigate("/login");
-        }*/
+        }
 
         getProjectInfo()
 
