@@ -2,9 +2,10 @@ CVE-Search-Docker
 go-exploitdb
 vuln-scanner/*/node_modules
 vuln-scanner/*/build
+vuln-scanner/*/reports
 *.env*
 .DS_Store
 test*
 vuln-scanner/backend/*.json
 vuln-scanner/backend/*.xml
-vuls-logs
+vuls-logs/*

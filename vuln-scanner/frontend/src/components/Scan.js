@@ -50,9 +50,16 @@ const Scan = () => {
 
     let { scanId } = useParams();
 
-    const saveFile = () => {
+    const generateScanReport = async () => {
+        let hashId = ""
+        if(scanHashId === "None") {
+            const res = await postFetch({ username: Session.get("username"), token: Session.get("token"), scanId }, "/generateScanReport")
+            hashId = res.data.scanHashId
+        }else{
+            hashId = scanHashId
+        }
         saveAs(
-            "https://" + process.env.REACT_APP_HOST_IP + ':' + SERVER_PORT + "/download?file=" + scanHashId + ".csv",
+            "https://" + process.env.REACT_APP_HOST_IP + ':' + SERVER_PORT + "/download?file=" + hashId + ".csv",
             scanName + ".csv"
         );
     };
@@ -60,7 +67,6 @@ const Scan = () => {
     const startScan = async () => {
         const res = await postFetch({ username: Session.get("username"), token: Session.get("token"), scanId, scanTarget }, "/startScan")
         setScanStartDate(res.data.scanStartDate)
-        console.log(res)
     }
 
     const getScanInfo = async () => {
@@ -70,7 +76,7 @@ const Scan = () => {
         setScanStartDate(scanInfo.data.scan.scan_start_date)
         setScanEndDate(scanInfo.data.scan.scan_end_date)
         setScanType(SCAN_TYPES[scanInfo.data.scan.scan_type_id - 1])
-        setScanHashId(scanInfo.data.scan.scan_hash_id)
+        setScanHashId(scanInfo.data.scan.hash_id)
     }
 
     let navigate = useNavigate();
@@ -88,8 +94,8 @@ const Scan = () => {
     return (
         <div className="container-fluid">
             <div className="d-sm-flex justify-content-between align-items-center mb-4">
-                <h3 className="text-dark mb-0">&nbsp;{scanName}</h3><Button variant="outline-success" onClick={startScan}>Start Scan</Button>
-                <button onClick={saveFile}>download</button>
+                <h3 className="text-dark mb-0">&nbsp;{scanName}</h3><button onClick={generateScanReport}>Download report</button><Button variant="outline-success" onClick={startScan}>Start Scan</Button>
+                
             </div>
             <div className="row">
                 <div className="col-md-6 col-xl-3 mb-4">

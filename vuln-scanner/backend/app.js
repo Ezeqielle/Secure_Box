@@ -8,6 +8,7 @@ var path = require('path');
 var cors = require('cors')
 const crypto = require('crypto');
 const nmapParser = require('./nmapParser')
+const toCSV = require('./toCSV')
 const { exec } = require("child_process");
 
 const httpsOptions = {
@@ -16,7 +17,7 @@ const httpsOptions = {
 };
 
 const USER_ADMIN_ROLE = 1
-const USER_READER_ROLE = 3
+const USER_READER_ROLE = 2
 const USER_SCAN_ROLE = 3
 
 app.use(express.json());
@@ -62,12 +63,11 @@ app.get('/download', function (req, res) {
   if (req.query !== undefined && req.query.file !== undefined) {
 
     try {
-      var filename = path.basename(file);
-      var file = __dirname + '/report/' + filename;
-      
+      // BIG FLAW HERE LOOOL
+      var file = __dirname + '/reports/' + req.query.file;
       if (fs.existsSync(file)) {
         var mimetype = mime.lookup(file);
-
+        var filename = path.basename(file);
         res.setHeader('Content-disposition', 'attachment; filename=' + filename);
         res.setHeader('Content-type', mimetype);
 
@@ -712,6 +712,51 @@ app.post('/startScan', async (req, res) => {
           if (error) throw error;
           nmapParser.execCode(scanId, scanTarget, db)
           JSON_RES.data = { scanStartDate: scanDatetime.toISOString().split(".")[0] }
+          res.status(200)
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+app.post('/generateScanReport', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.body != undefined && req.body.username != undefined && req.body.token != undefined && req.body.scanId != undefined) {
+
+
+    // Capture the input fields
+    const scanId = req.body.scanId;
+    const username = req.body.username
+    const token = req.body.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        await toCSV.toCSV(scanId, db)
+        db.query('SELECT scan_id, hash_id FROM Scans WHERE scan_id = ?', [scanId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+          JSON_RES.data = { scanId: results[0].scan_id, scanHashId: results[0].hash_id}
           res.status(200)
           res.json(JSON_RES);
           res.end();
