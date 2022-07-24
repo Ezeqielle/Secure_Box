@@ -2,9 +2,6 @@ const mysql = require("mysql");
 const fastcsv = require("fast-csv");
 const fs = require("fs");
 
-// generate id 50 char
-// check if not already in bdd
-
 const db = mysql.createConnection({
     host: "10.21.22.4",
     user: "root",
@@ -46,7 +43,7 @@ const reportHashID = (hashID, scanId) => {
     return ws;
 }
 
-// function to call 
+// function to call
 async function toCSV(scanId) {
     generateRandomString(50, scanId)
     db.query("SELECT * FROM Hosts WHERE scan_id = ?", [scanId] , function(error, data, fields) {
