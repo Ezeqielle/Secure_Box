@@ -3,6 +3,8 @@ const https = require('https');
 const fs = require('fs');
 const app = express();
 const mysql = require('mysql');
+var mime = require('mime');
+var path = require('path');
 var cors = require('cors')
 const crypto = require('crypto');
 const nmapParser = require('./nmapParser')
@@ -55,25 +57,57 @@ const checkToken = async (username, token, userId = -1) => {
   });
 }
 
+app.get('/download', function (req, res) {
+  var JSON_RES = { data: {}, error: {} }
+  if (req.query !== undefined && req.query.file !== undefined) {
+
+    try {
+      var filename = path.basename(file);
+      var file = __dirname + '/report/' + filename;
+      
+      if (fs.existsSync(file)) {
+        var mimetype = mime.lookup(file);
+
+        res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+        res.setHeader('Content-type', mimetype);
+
+        var filestream = fs.createReadStream(file);
+        filestream.pipe(res);
+      }
+    } catch (err) {
+      console.error(err)
+      JSON_RES.error = { errorMsg: "File not found" }
+      res.status(404)
+      res.json(JSON_RES);
+      res.end();
+    }
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+});
+
 app.get("/", async (req, res) => {
   res.json({ data: "Welcome" });
 });
 app.get("/test", (req, res) => {
   let cmd = `nmap -v -sS -p- -sV 9 -PR -O -oX test-res.xml 192.168.1.42`;
-    exec(cmd, (error, stdout,stderr) => {
-        if(error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if(stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-        res.json({ data: "scanning" });
-        res.end()
-    });
-    
+  exec(cmd, (error, stdout, stderr) => {
+    if (error) {
+      console.log(`error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.log(`stderr: ${stderr}`);
+      return;
+    }
+    console.log(`stdout: ${stdout}`);
+    res.json({ data: "scanning" });
+    res.end()
+  });
+
 });
 
 // ------------------------------------------------------------USER_ROUTES----------------------------------------------------
@@ -619,7 +653,7 @@ app.get('/getProjectScans', async (req, res) => {
     if (userInfo.isTokenValid) {
       if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE) {
         // Select report
-        db.query('SELECT * FROM Scans WHERE report_id = ? ', [reportId], (error, results) => {
+        db.query('SELECT * FROM Scans WHERE report_id = ? ORDER BY scan_start_date', [reportId], (error, results) => {
           // If there is an issue with the query, output the error
           if (error) throw error;
 
@@ -694,6 +728,58 @@ app.post('/startScan', async (req, res) => {
       res.json(JSON_RES);
       res.end();
     }
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+// ------------------------------------------------------------CVE_ROUTES----------------------------------------------------
+app.get('/getScanCVEs', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.scanId != undefined) {
+
+    // Capture the input fields
+    const scanId = req.query.scanId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Select report
+        db.query('SELECT cve_id, cve_name, cve_cvss FROM CVE AS c INNER JOIN Ports AS p ON p.port_id = c.port_id INNER JOIN (SELECT host_id FROM Hosts WHERE scan_id = ?) h ON h.host_id = p.host_id', [scanId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { cves: results }
+            res.status(200)
+          } else {
+            JSON_RES.error = { errorMsg: "No CVEs found for Scan" }
+            res.status(200)
+          }
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
   } else {
     JSON_RES.error = { errorMsg: "Bad parameters" }
     res.status(400)

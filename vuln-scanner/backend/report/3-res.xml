@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.80 scan initiated Sun Jul 24 16:46:23 2022 as: nmap -v -T5 -sS -p- -sV -PR -O -oX 3-res.xml 9 192.168.1.42 -->
+<nmaprun scanner="nmap" args="nmap -v -T5 -sS -p- -sV -PR -O -oX 3-res.xml 9 192.168.1.42" start="1658673983" startstr="Sun Jul 24 16:46:23 2022" version="7.80" xmloutputversion="1.04">
+<scaninfo type="syn" protocol="tcp" numservices="65535" services="1-65535"/>
+<verbose level="1"/>
+<debugging level="0"/>
+<taskbegin task="Ping Scan" time="1658673983"/>
+<taskend task="Ping Scan" time="1658673985" extrainfo="1 total hosts"/>
+<host><status state="down" reason="no-response" reason_ttl="0"/>
+<address addr="0.0.0.9" addrtype="ipv4"/>
+<hostnames>
+<hostname name="9" type="user"/>
+</hostnames>
+</host>
+<taskbegin task="Parallel DNS resolution of 1 host." time="1658673985"/>
+<taskend task="Parallel DNS resolution of 1 host." time="1658673985"/>
+<taskbegin task="SYN Stealth Scan" time="1658673985"/>
+<taskend task="SYN Stealth Scan" time="1658673987" extrainfo="65535 total ports"/>
+<taskbegin task="Service scan" time="1658673987"/>
+<taskend task="Service scan" time="1658674009" extrainfo="3 services on 1 host"/>
+<taskbegin task="NSE" time="1658674011"/>
+<taskend task="NSE" time="1658674011"/>
+<taskbegin task="NSE" time="1658674011"/>
+<taskend task="NSE" time="1658674011"/>
+<host starttime="1658673985" endtime="1658674011"><status state="up" reason="localhost-response" reason_ttl="0"/>
+<address addr="192.168.1.42" addrtype="ipv4"/>
+<hostnames>
+<hostname name="xps-15" type="PTR"/>
+</hostnames>
+<ports><extraports state="closed" count="65525">
+<extrareasons reason="resets" count="65525"/>
+</extraports>
+<port protocol="tcp" portid="443"><state state="filtered" reason="no-response" reason_ttl="0"/><service name="https" method="table" conf="3"/></port>
+<port protocol="tcp" portid="902"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="vmware-auth" product="VMware Authentication Daemon" version="1.10" extrainfo="Uses VNC, SOAP" tunnel="ssl" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="1326"><state state="filtered" reason="no-response" reason_ttl="0"/><service name="wimsic" method="table" conf="3"/></port>
+<port protocol="tcp" portid="3000"><state state="filtered" reason="no-response" reason_ttl="0"/><service name="ppp" method="table" conf="3"/></port>
+<port protocol="tcp" portid="3001"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Node.js Express framework" tunnel="ssl" method="probed" conf="10"><cpe>cpe:/a:nodejs:node.js</cpe></service></port>
+<port protocol="tcp" portid="5000"><state state="filtered" reason="no-response" reason_ttl="0"/><service name="upnp" method="table" conf="3"/></port>
+<port protocol="tcp" portid="5050"><state state="filtered" reason="no-response" reason_ttl="0"/><service name="mmcc" method="table" conf="3"/></port>
+<port protocol="tcp" portid="6379"><state state="filtered" reason="no-response" reason_ttl="0"/><service name="redis" method="table" conf="3"/></port>
+<port protocol="tcp" portid="8080"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Node.js Express framework" method="probed" conf="10"><cpe>cpe:/a:nodejs:node.js</cpe></service></port>
+<port protocol="tcp" portid="27017"><state state="filtered" reason="no-response" reason_ttl="0"/><service name="mongod" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="902"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<portused state="closed" proto="udp" portid="41533"/>
+<osmatch name="Linux 2.6.32" accuracy="100" line="55543">
+<osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6.32</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="877919" lastboot="Thu Jul 14 12:54:52 2022"/>
+<distance value="0"/>
+<tcpsequence index="256" difficulty="Good luck!" values="64375A60,48C26ED1,A9ADAC8B,EB54591D,9A583097,DB948839"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="1000HZ" values="3453FA36,3453FA9A,3453FAFF,3453FB63,3453FBC7,3453FC2B"/>
+<times srtt="86" rttvar="34" to="50000"/>
+</host>
+<runstats><finished time="1658674011" timestr="Sun Jul 24 16:46:51 2022" elapsed="27.95" summary="Nmap done at Sun Jul 24 16:46:51 2022; 2 IP addresses (1 host up) scanned in 27.95 seconds" exit="success"/><hosts up="1" down="1" total="2"/>
+</runstats>
+</nmaprun>

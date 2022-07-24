@@ -38,49 +38,39 @@ export const options = {
     },
 };
 
-const labels = ['Scan_1', 'Scan_2', 'Scan_3', 'Scan_4', 'Scan_5', 'Scan_6', 'Scan_7'];
-
-export const dataLine = {
-    labels,
-    datasets: [
-        {
-            label: 'Critical',
-            data: [30, 20, 15, 9, 5, 3, 2],
-            borderColor: 'rgb(139, 0, 0)',
-            backgroundColor: 'rgba(139, 0, 0, 0.5)',
-        },
-        {
-            label: 'High',
-            data: [20, 10, 5, 4, 2, 0, 0],
-            borderColor: 'rgb(135, 206, 235)',
-            backgroundColor: 'rgba(135, 206, 235, 0.5)',
-        },
-        {
-            label: 'Medium',
-            data: [30, 23, 16, 10, 7, 7, 5],
-            borderColor: 'rgb(255, 165, 0)',
-            backgroundColor: 'rgba(255, 165, 0, 0.5)',
-        },
-        {
-            label: 'Low',
-            data: [23, 15, 6, 0, 0, 0, 0],
-            borderColor: 'rgb(144, 238, 144)',
-            backgroundColor: 'rgba(144, 238, 144, 0.5)',
-        },
-    ],
-};
-
-export const dataBar = {
-    labels,
-    datasets: [
-        {
-            label: 'All vulnerabilities',
-            data: [103, 68, 42, 23, 14, 10, 7],
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        },
-    ],
-};
-
+let chartDatasetsByCriticality = [
+    {
+        label: 'Critical',
+        data: [],
+        borderColor: 'rgb(139, 0, 0)',
+        backgroundColor: 'rgba(139, 0, 0, 0.5)',
+    },
+    {
+        label: 'High',
+        data: [],
+        borderColor: 'rgb(135, 206, 235)',
+        backgroundColor: 'rgba(135, 206, 235, 0.5)',
+    },
+    {
+        label: 'Medium',
+        data: [],
+        borderColor: 'rgb(255, 165, 0)',
+        backgroundColor: 'rgba(255, 165, 0, 0.5)',
+    },
+    {
+        label: 'Low',
+        data: [],
+        borderColor: 'rgb(144, 238, 144)',
+        backgroundColor: 'rgba(144, 238, 144, 0.5)',
+    },
+]
+let chartDatasetsAllCVEs = [
+    {
+        label: 'All vulnerabilities',
+        data: [],
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+    },
+]
 Session.config(true, 60)
 
 const ProjectDashboard = () => {
@@ -91,10 +81,48 @@ const ProjectDashboard = () => {
     const [projectDate, setProjectDate] = useState("");
     const [userName, setUserName] = useState("");
     const [projectScans, setProjectScans] = useState([]);
+    const [graphDataLine, setGraphDataLine] = useState({
+        labels: [],
+        datasets: chartDatasetsByCriticality
+    });
+    const [graphDataBar, setGraphDataBar] = useState({
+        labels: [],
+        datasets: chartDatasetsAllCVEs
+    });
 
 
     let { projectId } = useParams();
 
+    const getScansCVEs = async (scans) => {
+        let labels = []
+        for (const [scanKey, scan] of Object.entries(scans)) {
+            labels.push(scan.scan_name)
+            let scanCVEsNum = 0
+            let scanCVEsCriticality = { critical: 0, high: 0, medium: 0, low: 0 }
+            let scanCVEs = await getFetch({ username: Session.get("username"), token: Session.get("token"), scanId: scan.scan_id }, "/getScanCVEs")
+            if (scanCVEs.error.errorMsg === undefined) {
+                scanCVEsNum = scanCVEs.data.cves.length
+                for (const [cveKey, cve] of Object.entries(scanCVEs.data.cves)) {
+                    if (cve.cve_cvss < 4) {
+                        scanCVEsCriticality.low += 1
+                    } else if (cve.cve_cvss < 7) {
+                        scanCVEsCriticality.medium += 1
+                    } else if (cve.cve_cvss < 9) {
+                        scanCVEsCriticality.high += 1
+                    } else {
+                        scanCVEsCriticality.critical += 1
+                    }
+                }
+            }
+            chartDatasetsByCriticality[0].data.push(scanCVEsCriticality.critical)
+            chartDatasetsByCriticality[1].data.push(scanCVEsCriticality.high)
+            chartDatasetsByCriticality[2].data.push(scanCVEsCriticality.medium)
+            chartDatasetsByCriticality[3].data.push(scanCVEsCriticality.low)
+            chartDatasetsAllCVEs[0].data.push(scanCVEsNum)
+        }
+        setGraphDataLine({ labels, datasets: chartDatasetsByCriticality })
+        setGraphDataBar({labels, datasets: chartDatasetsAllCVEs})
+    }
     const getProjectInfo = async () => {
         const projectInfo = await getFetch({ username: Session.get("username"), token: Session.get("token"), reportId: projectId }, "/getProjectInfo")
         const projectScans = await getFetch({ username: Session.get("username"), token: Session.get("token"), reportId: projectId }, "/getProjectScans")
@@ -103,6 +131,7 @@ const ProjectDashboard = () => {
         setProjectDate(projectInfo.data.reportDate)
         setProjectScans(projectScans.data.scans)
         setUserName(userInfo.data.user.user_name)
+        getScansCVEs(projectScans.data.scans)
     }
 
     let navigate = useNavigate();
@@ -176,7 +205,7 @@ const ProjectDashboard = () => {
                                                 {projectScans.map((scan, i) => (
                                                     <tr key={i}>
                                                         <td>{scan.scan_name}</td>
-                                                        <td>{SCAN_TYPES[scan.scan_type_id]}</td>
+                                                        <td>{SCAN_TYPES[scan.scan_type_id - 1]}</td>
                                                         <td>{scan.scan_target}</td>
                                                         <td><Link to={"/scan/" + scan.scan_id}><BoxArrowUpRight /></Link></td>
                                                     </tr>
@@ -197,7 +226,7 @@ const ProjectDashboard = () => {
                 <div className="col-lg-12 mb-1">
                     <div className="card shadow mb-4">
                         <div className="card-header d-flex justify-content-between align-items-center">
-                            <h6 className="text-primary fw-bold m-0">Vulnerabilities resolved</h6>
+                            <h6 className="text-primary fw-bold m-0">Vulnerabilities</h6>
                             <div className="dropdown no-arrow"><button className="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button"><i className="fas fa-ellipsis-v text-gray-400"></i></button>
                                 <div className="dropdown-menu shadow dropdown-menu-end animated--fade-in">
                                     <p className="text-center dropdown-header">dropdown header:</p><a className="dropdown-item" href="#">&nbsp;Action</a><a className="dropdown-item" href="#">&nbsp;Another action</a>
@@ -211,14 +240,14 @@ const ProjectDashboard = () => {
                                 <div className="col-lg-6 mb-4">
                                     <div className="card">
                                         <div className="card-body">
-                                            <Line data={dataLine} options={options} />
+                                            <Line data={graphDataLine} options={options} />
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-lg-6 mb-4">
                                     <div className="card">
                                         <div className="card-body">
-                                            <Bar data={dataBar} options={options} />
+                                            <Bar data={graphDataBar} options={options} />
                                         </div>
                                     </div>
                                 </div>

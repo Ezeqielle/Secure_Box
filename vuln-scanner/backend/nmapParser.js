@@ -31,11 +31,18 @@ async function execCode(scanId, scanTarget, db) {
 
 // Parsing JSON to DB //
 function json2db(scanId, db) {
+    let scanDatetime = new Date();
+    db.query("UPDATE Scans SET scan_end_date = ? WHERE scan_id = ?", [scanDatetime.toISOString().split(".")[0], scanId], (error) => {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+    });
     fs.readFile(`${scanId}-res.json`, async (err, data) => {
         if (err) throw err;
+        
         let result = JSON.parse(data);
         let target = result.nmaprun.host
         for (let i = 0; i < target.length; i++) {
+           
             let stat = target[i].status['@_state'];
             if (stat === 'up') {
                 let addrIp = "None";
@@ -71,7 +78,7 @@ function json2db(scanId, db) {
                 db.query('INSERT INTO Hosts (host_name, host_ip, host_os, host_mac, host_status, scan_id) VALUES (?, ?, ?, ?, ?, ?)', [hostName, addrIp, host_os, addrMac, stat, scanId], (error, result) => {
                     if (error) throw error
 
-                    
+
                     if (target[i].ports !== undefined) {
                         const host_id = result.insertId
                         for (let x = 0; x < target[i].ports.port.length; x++) {
@@ -93,23 +100,23 @@ function json2db(scanId, db) {
                                     if (service_version.indexOf('X') > -1) {
                                         service_version = service_version.split('X')[0];
                                     }
-                                    if(target[i].ports.port[x].service.cpe !== undefined){
+                                    if (target[i].ports.port[x].service.cpe !== undefined) {
                                         let cpe
                                         if (Array.isArray(target[i].ports.port[x].service.cpe)) {
                                             cpe = target[i].ports.port[x].service.cpe[0]
-                                        }else{
+                                        } else {
                                             cpe = target[i].ports.port[x].service.cpe
                                         }
                                         cpeArray = cpe.split(":")
-                                        if(cpeArray.length === 5){
+                                        if (cpeArray.length === 5) {
                                             service_product = cpeArray[2]
                                             service_version = cpeArray[4]
                                             service_name = cpeArray[3]
                                         }
                                     }
-                                    
 
-                                    //console.log(`product: ${service_product}, version: ${service_version}, name: ${service_name}, port_id: ${port_id}`)
+
+                                    console.log(`product: ${service_product}, version: ${service_version}, name: ${service_name}, port_id: ${port_id}`)
                                     getCVE.getCVE(service_product, service_version, service_name, port_id, db)
                                 });
                             }
