@@ -48,14 +48,14 @@ let chartDatasetsByCriticality = [
     {
         label: 'High',
         data: [],
-        borderColor: 'rgb(135, 206, 235)',
-        backgroundColor: 'rgba(135, 206, 235, 0.5)',
+        borderColor: 'rgb(255, 165, 0)',
+        backgroundColor: 'rgba(255, 165, 0, 0.5)',
     },
     {
         label: 'Medium',
         data: [],
-        borderColor: 'rgb(255, 165, 0)',
-        backgroundColor: 'rgba(255, 165, 0, 0.5)',
+        borderColor: 'rgb(135, 206, 235)',
+        backgroundColor: 'rgba(135, 206, 235, 0.5)',
     },
     {
         label: 'Low',

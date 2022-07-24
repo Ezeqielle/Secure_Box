@@ -782,6 +782,58 @@ app.post('/generateScanReport', async (req, res) => {
 
 });
 
+// ------------------------------------------------------------HOST_ROUTES----------------------------------------------------
+app.get('/getScanHosts', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.scanId != undefined) {
+
+    // Capture the input fields
+    const scanId = req.query.scanId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Select report
+        db.query('SELECT * FROM Hosts WHERE scan_id = ?', [scanId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { hosts: results }
+          } else {
+            JSON_RES.data = { hosts: [] }
+            JSON_RES.error = { errorMsg: "No Hosts found" }
+          }
+          res.status(200)
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
 // ------------------------------------------------------------CVE_ROUTES----------------------------------------------------
 app.get('/getScanCVEs', async (req, res) => {
   var JSON_RES = { data: {}, error: {} }
