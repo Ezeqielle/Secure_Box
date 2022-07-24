@@ -1,10 +1,14 @@
 const mysql = require("mysql");
 const fastcsv = require("fast-csv");
 const fs = require("fs");
+
+// generate id 50 char
+// check if not already in bdd
+
 const ws = fs.createWriteStream("output.csv");
 
 const db = mysql.createConnection({
-    host: "localhost",
+    host: "10.21.22.4",
     user: "root",
     password: "example",
     database: "secureBox"
