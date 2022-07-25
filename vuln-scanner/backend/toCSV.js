@@ -1,4 +1,3 @@
-const mysql = require("mysql");
 const fastcsv = require("fast-csv");
 const fs = require("fs");
 
@@ -30,10 +29,9 @@ const reportHashID = (hashID, scanId, db) => {
     return toWrite;
 }
 
-// function to call
-async function toCSV(scanId, db) {
-    let ws = generateRandomString(50, scanId, db)
-    db.query("SELECT h.host_ip, h.host_name, p.port_number, p.service_name, p.service_version, cve_name, cve_access_complexity FROM CVE AS c INNER JOIN Ports AS p ON p.port_id = c.port_id INNER JOIN Hosts AS h on p.host_id = h.host_id where scan_id = ? && c.cve_hidden = 0", [scanId] , function(error, data, fields) {
+// prepare csv export
+async function cve2csv(scan_id, db,ws) {
+    db.query("SELECT h.host_ip, h.host_name, p.port_number, p.service_name, p.service_version, cve_name, cve_access_complexity FROM CVE AS c INNER JOIN Ports AS p ON p.port_id = c.port_id INNER JOIN Hosts AS h on p.host_id = h.host_id where scan_id = ?", [scan_id] , function(error, data, fields) {
         if (error) throw error;
         const jsonData = JSON.parse(JSON.stringify(data));
         fastcsv
@@ -43,6 +41,61 @@ async function toCSV(scanId, db) {
             })
             .pipe(ws);
     });
+}
+
+async function port2csv(scan_id, db,ws) {
+    db.query("SELECT h.host_ip, h.host_name, p.port_number, p.service_name, p.service_version FROM Ports AS p INNER JOIN Hosts AS h on p.host_id = h.host_id WHERE scan_id = ?", [scan_id] , function(error, data, fields) {
+        if (error) throw error;
+        const jsonData = JSON.parse(JSON.stringify(data));
+        fastcsv
+            .write(jsonData, { headers: true })
+            .on("finish", function() {
+                console.log("csv done!");
+            })
+            .pipe(ws);
+    });
+}
+
+async function host2csv(scan_id, db,ws) {
+    db.query("SELECT host_ip, host_name FROM Hosts where scan_id = ?", [scan_id] , function(error, data, fields) {
+        if (error) throw error;
+        const jsonData = JSON.parse(JSON.stringify(data));
+        fastcsv
+            .write(jsonData, { headers: true })
+            .on("finish", function() {
+                console.log("csv done!");
+            })
+            .pipe(ws);
+    });
+}
+
+// function to call
+async function toCSV(scanId, db) {
+    let ws = generateRandomString(50, scanId, db);
+    let result;
+    db.query("SELECT h.host_ip, h.host_name, p.port_number, p.service_name, p.service_version, cve_name, cve_access_complexity FROM CVE AS c INNER JOIN Ports AS p ON p.port_id = c.port_id INNER JOIN Hosts AS h on p.host_id = h.host_id where scan_id = ?", [scanId] , function(error, data, fields) {
+        if (error) throw error;
+        if (result.length > 0) {
+            cve2csv(scanId, db, ws)
+        } else if (result.length < 0) {
+            db.query("SELECT h.host_ip, h.host_name, p.port_number, p.service_name, p.service_version FROM Ports AS p INNER JOIN Hosts AS h on p.host_id = h.host_id WHERE scan_id = ?", [scanId] , function(error, data, fields) {
+                if (error) throw error;
+                if (result.length > 0) {
+                    port2csv(scanId, db, ws)
+                } else {
+                    db.query("SELECT host_ip, host_name FROM Hosts where scan_id = ?", [scanId] , function(error, data, fields) {
+                        if (error) throw error;
+                        if (result.length > 0) {
+                            host2csv(scanId, db, ws)
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+
+
 };
 
 module.exports = { toCSV };
