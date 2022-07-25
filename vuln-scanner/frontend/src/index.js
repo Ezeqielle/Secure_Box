@@ -16,6 +16,7 @@ import Login from './components/Login';
 import Logout from './components/Logout';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
+import Host from './components/Host';
 import NotFound404 from './components/NotFound404';
 import ScanCreation from './components/ScanCreation';
 import ProjectCreation from './components/ProjectCreation';
@@ -57,7 +58,8 @@ root.render(
           <Route path="/allprojects" element={<BaseHome childComponent={<AllProjects />} />} />
           <Route path="/accountedit/:searcheduser" element={<BaseHome childComponent={<AccountEdit />} />} />
           <Route path="/scan/:scanId" element={<BaseHome childComponent={<Scan />} />} />
-          <Route path="/vulnerability" element={<BaseHome childComponent={<Vulnerability />} />} />
+          <Route path="/host/:hostId" element={<BaseHome childComponent={<Host />} />} />
+          <Route path="/vulnerability/:portId/:cveId" element={<BaseHome childComponent={<Vulnerability />} />} />
           <Route path="/vulnerabilitiesList" element={<BaseHome childComponent={<VulnerabilitiesList />} />} />
         </Routes>
   </BrowserRouter>

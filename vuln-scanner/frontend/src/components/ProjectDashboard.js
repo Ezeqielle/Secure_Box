@@ -1,7 +1,8 @@
 import { getFetch } from '../utils/functions';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
-import { BoxArrowUpRight } from 'react-bootstrap-icons';
+import Button from 'react-bootstrap/Button';
+import { BoxArrowUpRight, ArrowLeftCircle } from 'react-bootstrap-icons';
 import { Link } from "react-router-dom";
 import Session from 'react-session-api'
 import { Line, Bar } from 'react-chartjs-2';
@@ -48,14 +49,14 @@ let chartDatasetsByCriticality = [
     {
         label: 'High',
         data: [],
-        borderColor: 'rgb(135, 206, 235)',
-        backgroundColor: 'rgba(135, 206, 235, 0.5)',
+        borderColor: 'rgb(255, 165, 0)',
+        backgroundColor: 'rgba(255, 165, 0, 0.5)',
     },
     {
         label: 'Medium',
         data: [],
-        borderColor: 'rgb(255, 165, 0)',
-        backgroundColor: 'rgba(255, 165, 0, 0.5)',
+        borderColor: 'rgb(135, 206, 235)',
+        backgroundColor: 'rgba(135, 206, 235, 0.5)',
     },
     {
         label: 'Low',
@@ -149,6 +150,9 @@ const ProjectDashboard = () => {
 
     return (
         <div className="container-fluid">
+            <div className="d-sm-flex justify-content-between align-items-center mb-4">
+                <Button variant="outline-dark" onClick={() => navigate(-1)}><ArrowLeftCircle /> Back</Button>
+            </div>
             <div className="d-sm-flex justify-content-between align-items-center mb-4">
                 <h3 className="text-dark mb-0">{projectName}</h3><Link to={"/scancreation/" + projectId} className="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="assets/add_asset.html"><i className="fas fa-plus fa-sm text-white-50"></i>&nbsp;New Scan</Link>
             </div>

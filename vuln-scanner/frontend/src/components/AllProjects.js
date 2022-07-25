@@ -84,7 +84,6 @@ const AllProjects = () => {
                             <tbody>
                                 {allProjects.filter(post => {
                                     if (inputText === '') {
-                                        console.log(post);
                                         return post;
                                     } else if (post.report_name.toLowerCase().includes(inputText)) {
                                         return post;
