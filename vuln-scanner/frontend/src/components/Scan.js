@@ -4,8 +4,9 @@ import { getFetch, postFetch } from '../utils/functions';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import Session from 'react-session-api'
+import { BoxArrowUpRight, ArrowLeftCircle } from 'react-bootstrap-icons';
 import { SERVER_PORT } from '../utils/config';
 import { saveAs } from "file-saver";
 
@@ -44,6 +45,7 @@ const Scan = () => {
     const [scanType, setScanType] = useState("");
     const [scanHashId, setScanHashId] = useState("");
     const [scanCVEsNum, setScanCVEsNum] = useState(0);
+    const [scanHostVulnarable, setScanHostVulnarable] = useState(0);
     const [scanHostsNum, setScanHostsNum] = useState(0);
     const [scanHighCVEsNum, setScanHighCVEsNum] = useState(0);
     const [scanHosts, setScanHosts] = useState([]);
@@ -78,8 +80,10 @@ const Scan = () => {
 
     const getCVEs = async () => {
         let scanCVEsCriticality = [0, 0, 0, 0]
+
         let scanCVEs = await getFetch({ username: Session.get("username"), token: Session.get("token"), scanId }, "/getScanCVEs")
         if (scanCVEs.error.errorMsg === undefined) {
+            let vulnarableHost = [];
             setScanCVEsNum(scanCVEs.data.cves.length)
             for (const [cveKey, cve] of Object.entries(scanCVEs.data.cves)) {
                 if (cve.cve_cvss < 4) {
@@ -91,7 +95,11 @@ const Scan = () => {
                 } else {
                     scanCVEsCriticality[0] += 1
                 }
+                if (!vulnarableHost.includes(cve.host_id)) {
+                    vulnarableHost.push(cve.host_id)
+                }
             }
+            setScanHostVulnarable(vulnarableHost.length)
             setScanHighCVEsNum(scanCVEsCriticality[0] + scanCVEsCriticality[1])
             chartArcDatasets[0].data = scanCVEsCriticality
             //console.log(chartArcDatasets)
@@ -132,8 +140,13 @@ const Scan = () => {
     return (
         <div className="container-fluid">
             <div className="d-sm-flex justify-content-between align-items-center mb-4">
-                <h3 className="text-dark mb-0">&nbsp;{scanName}</h3><button onClick={generateScanReport}>Download report</button><Button variant="outline-success" onClick={startScan} disabled={scanStartDate !== "None" ? "disabled" : ""}>Start Scan</Button>
+                <Button variant="outline-dark" onClick={() => navigate(-1)}><ArrowLeftCircle /> Back</Button><Button variant="secondary" size="lg" onClick={generateScanReport}>Download report</Button><Button variant="outline-success" onClick={startScan} disabled={scanStartDate !== null ? true : false}>Start Scan</Button>
+            </div>
+            <div className="row">
+                <div className="d-sm-flex justify-content-between align-items-center mb-4">
+                    <h3 className="text-dark mb-0">&nbsp;{scanName}</h3>
 
+                </div>
             </div>
             <Alert show={showAlert} variant="success">
                 <Alert.Heading>Scan started</Alert.Heading>
@@ -154,7 +167,7 @@ const Scan = () => {
                             <div className="row align-items-center no-gutters">
                                 <div className="col me-2">
                                     <div className="text-uppercase text-primary fw-bold text-xs mb-1"><span>nb of vulnerable hosts</span></div>
-                                    <div className="text-dark fw-bold h5 mb-0"><span>0</span></div>
+                                    <div className="text-dark fw-bold h5 mb-0"><span>{scanHostVulnarable}</span></div>
                                 </div>
                                 <div className="col-auto"><i className="fas fa-door-open fa-2x text-gray-300"></i></div>
                             </div>
@@ -213,7 +226,7 @@ const Scan = () => {
                 <div className="col">
                     <div className="card shadow mb-5">
                         <div className="card-header py-3">
-                            <p className="text-primary m-0 fw-bold">Scan informations&nbsp;</p>
+                            <p className="text-primary m-0 fw-bold">Scan information&nbsp;</p>
                         </div>
                         <div className="card-body">
                             <form>
@@ -285,7 +298,7 @@ const Scan = () => {
                                             <td> {host.host_name}</td>
                                             <td>{host.host_ip}</td>
                                             <td>{host.host_mac}</td>
-                                            <td>link</td>
+                                            <td><Link to={"/host/" + host.host_id}><BoxArrowUpRight /></Link></td>
                                         </tr>
                                     ))}
 
@@ -307,129 +320,6 @@ const Scan = () => {
                         </div>
                         <div className="card-body">
                             <div><Pie data={graphDataArc} /></div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-lg-7 col-xl-8">
-                    <div className="card shadow mb-4">
-                        <div className="card-header d-flex justify-content-between align-items-center">
-                            <h6 className="text-primary fw-bold m-0">All vulnerabilities</h6>
-                            <div className="dropdown no-arrow"><button className="btn btn-link btn-sm dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button"><i className="fas fa-ellipsis-v text-gray-400"></i></button>
-                                <div className="dropdown-menu shadow dropdown-menu-end animated--fade-in">
-                                    <p className="text-center dropdown-header">Options</p><a className="dropdown-item" href="#">&nbsp;View all vulnerabilities</a>
-                                    <div className="dropdown-divider"></div><a className="dropdown-item" href="#">&nbsp;Something else here</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="table-responsive">
-                            <table className="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Vulnerability</th>
-                                        <th>Port</th>
-                                        <th>Service</th>
-                                        <th>Criticity</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>xss</td>
-                                        <td>80</td>
-                                        <td>Samba</td>
-                                        <td className="text-dark" style={{ fontWeight: "bold" }}>Critical</td>
-                                        <td><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-placement="bottom" style={{ color: "var(--bs-blue)", fontSize: "20px" }} title="Details">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                                            <line x1="10" y1="14" x2="20" y2="4"></line>
-                                            <polyline points="15 4 20 4 20 9"></polyline>
-                                        </svg></td>
-                                    </tr>
-                                    <tr>
-                                        <td>first scan</td>
-                                        <td>127</td>
-                                        <td>SSH</td>
-                                        <td style={{ fontWeight: "bold", color: "var(--bs-red)" }}>High</td>
-                                        <td><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-placement="bottom" style={{ color: "var(--bs-blue)", fontSize: "20px" }} title="Details">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                                            <line x1="10" y1="14" x2="20" y2="4"></line>
-                                            <polyline points="15 4 20 4 20 9"></polyline>
-                                        </svg></td>
-                                    </tr>
-                                    <tr>
-                                        <td>first scan</td>
-                                        <td>127</td>
-                                        <td>agressive</td>
-                                        <td style={{ color: "var(--bs-orange)", fontWeight: "bold" }}>Medium</td>
-                                        <td><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-placement="bottom" style={{ color: "var(--bs-blue)", fontSize: "20px" }} title="Details">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                                            <line x1="10" y1="14" x2="20" y2="4"></line>
-                                            <polyline points="15 4 20 4 20 9"></polyline>
-                                        </svg></td>
-                                    </tr>
-                                    <tr>
-                                        <td>first scan</td>
-                                        <td>127</td>
-                                        <td>agressive</td>
-                                        <td style={{ color: "var(--bs-yellow)", fontWeight: "bold" }}>Low</td>
-                                        <td><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-placement="bottom" style={{ color: "var(--bs-blue)", fontSize: "20px" }} title="Details">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                                            <line x1="10" y1="14" x2="20" y2="4"></line>
-                                            <polyline points="15 4 20 4 20 9"></polyline>
-                                        </svg></td>
-                                    </tr>
-                                    <tr>
-                                        <td>first scan</td>
-                                        <td>127</td>
-                                        <td>agressive</td>
-                                        <td style={{ color: "var(--bs-cyan)", fontWeight: "bold" }}>Info</td>
-                                        <td><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-placement="bottom" style={{ color: "var(--bs-blue)", fontSize: "20px" }} title="Details">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                                            <line x1="10" y1="14" x2="20" y2="4"></line>
-                                            <polyline points="15 4 20 4 20 9"></polyline>
-                                        </svg></td>
-                                    </tr>
-                                    <tr>
-                                        <td>first scan</td>
-                                        <td>127</td>
-                                        <td>agressive</td>
-                                        <td>24/03/2021</td>
-                                        <td><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-placement="bottom" style={{ color: "var(--bs-blue)", fontSize: "20px" }} title="Details">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                                            <line x1="10" y1="14" x2="20" y2="4"></line>
-                                            <polyline points="15 4 20 4 20 9"></polyline>
-                                        </svg></td>
-                                    </tr>
-                                    <tr>
-                                        <td>first scan</td>
-                                        <td>127</td>
-                                        <td>agressive</td>
-                                        <td>24/03/2021</td>
-                                        <td><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-placement="bottom" style={{ color: "var(--bs-blue)", fontSize: "20px" }} title="Details">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                                            <line x1="10" y1="14" x2="20" y2="4"></line>
-                                            <polyline points="15 4 20 4 20 9"></polyline>
-                                        </svg></td>
-                                    </tr>
-                                    <tr>
-                                        <td>test</td>
-                                        <td>127<br /></td>
-                                        <td>discover</td>
-                                        <td>24/03/2021<br /></td>
-                                        <td><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-external-link" data-bs-toggle="tooltip" data-bss-tooltip="" data-bs-placement="bottom" style={{ color: "var(--bs-blue)", fontSize: "20px" }} title="Details">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M11 7h-5a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-5"></path>
-                                            <line x1="10" y1="14" x2="20" y2="4"></line>
-                                            <polyline points="15 4 20 4 20 9"></polyline>
-                                        </svg></td>
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 </div>

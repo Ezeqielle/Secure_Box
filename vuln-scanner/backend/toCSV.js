@@ -33,7 +33,7 @@ const reportHashID = (hashID, scanId, db) => {
 // function to call
 async function toCSV(scanId, db) {
     let ws = generateRandomString(50, scanId, db)
-    db.query("SELECT h.host_ip, h.host_name, p.port_number, p.service_name, p.service_version, cve_name, cve_access_complexity FROM CVE AS c INNER JOIN Ports AS p ON p.port_id = c.port_id INNER JOIN Hosts AS h on p.host_id = h.host_id INNER JOIN Scans AS s on s.scan_id = ?", [scanId] , function(error, data, fields) {
+    db.query("SELECT h.host_ip, h.host_name, p.port_number, p.service_name, p.service_version, cve_name, cve_access_complexity FROM CVE AS c INNER JOIN Ports AS p ON p.port_id = c.port_id INNER JOIN Hosts AS h on p.host_id = h.host_id where scan_id = ? && c.cve_hidden = 0", [scanId] , function(error, data, fields) {
         if (error) throw error;
         const jsonData = JSON.parse(JSON.stringify(data));
         fastcsv

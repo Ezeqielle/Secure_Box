@@ -756,7 +756,7 @@ app.post('/generateScanReport', async (req, res) => {
         db.query('SELECT scan_id, hash_id FROM Scans WHERE scan_id = ?', [scanId], (error, results) => {
           // If there is an issue with the query, output the error
           if (error) throw error;
-          JSON_RES.data = { scanId: results[0].scan_id, scanHashId: results[0].hash_id}
+          JSON_RES.data = { scanId: results[0].scan_id, scanHashId: results[0].hash_id }
           res.status(200)
           res.json(JSON_RES);
           res.end();
@@ -835,13 +835,13 @@ app.get('/getScanHosts', async (req, res) => {
 });
 
 // ------------------------------------------------------------CVE_ROUTES----------------------------------------------------
-app.get('/getScanCVEs', async (req, res) => {
+app.get('/getCVE', async (req, res) => {
   var JSON_RES = { data: {}, error: {} }
   // Ensure the input fields exists and are not empty
-  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.scanId != undefined) {
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.cveId != undefined) {
 
     // Capture the input fields
-    const scanId = req.query.scanId;
+    const cveId = req.query.cveId;
     const username = req.query.username
     const token = req.query.token
 
@@ -850,16 +850,16 @@ app.get('/getScanCVEs', async (req, res) => {
     if (userInfo.isTokenValid) {
       if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
         // Select report
-        db.query('SELECT cve_id, cve_name, cve_cvss FROM CVE AS c INNER JOIN Ports AS p ON p.port_id = c.port_id INNER JOIN (SELECT host_id FROM Hosts WHERE scan_id = ?) h ON h.host_id = p.host_id', [scanId], (error, results) => {
+        db.query('SELECT * FROM CVE WHERE cve_id = ?', [cveId], (error, results) => {
           // If there is an issue with the query, output the error
           if (error) throw error;
 
           if (results.length > 0) {
-            JSON_RES.data = { cves: results }
+            JSON_RES.data = { cve: results[0] }
             res.status(200)
           } else {
-            JSON_RES.error = { errorMsg: "No CVEs found for Scan" }
-            res.status(200)
+            JSON_RES.error = { errorMsg: "CVE not found" }
+            res.status(404)
           }
           res.json(JSON_RES);
           res.end();
@@ -886,6 +886,260 @@ app.get('/getScanCVEs', async (req, res) => {
 
 });
 
+app.get('/getScanCVEs', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.scanId != undefined) {
+
+    // Capture the input fields
+    const scanId = req.query.scanId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Select report
+        db.query('SELECT cve_id, cve_name, cve_cvss, p.port_number, h.host_id FROM CVE AS c INNER JOIN Ports AS p ON p.port_id = c.port_id INNER JOIN Hosts AS h on p.host_id = h.host_id where scan_id = ? && c.cve_hidden = 0', [scanId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { cves: results }
+          } else {
+            JSON_RES.data = { cves: [] }
+            JSON_RES.error = { errorMsg: "No CVEs found for Scan" }
+          }
+          res.status(200)
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+// ------------------------------------------------------------HOST_ROUTES----------------------------------------------------
+app.get('/getHost', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.hostId != undefined) {
+
+    // Capture the input fields
+    const hostId = req.query.hostId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Select report
+        db.query('SELECT * FROM Hosts WHERE host_id = ?', [hostId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { host: results[0] }
+            res.status(200)
+          } else {
+            JSON_RES.error = { errorMsg: "Host does not exist" }
+            res.status(404)
+          }
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+app.get('/getHostPorts', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.hostId != undefined) {
+
+    // Capture the input fields
+    const hostId = req.query.hostId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Select report
+        db.query('SELECT * FROM Ports WHERE host_id = ?', [hostId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { ports: results }
+          } else {
+            JSON_RES.data = { ports: [] }
+            JSON_RES.error = { errorMsg: "Host does not have open ports" }
+          }
+          res.status(200)
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+
+app.get('/getHostCVEs', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.hostId != undefined) {
+
+    // Capture the input fields
+    const hostId = req.query.hostId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Select report
+        db.query('SELECT p.port_id, p.port_number, p.service_name, cve_id, cve_name, cve_cvss FROM CVE AS c INNER JOIN Ports AS p ON p.port_id = c.port_id where host_id = ? && c.cve_hidden = 0', [hostId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { cves: results }
+          } else {
+            JSON_RES.error = { cves: [], errorMsg: "Host does not have CVEs" }
+          }
+          res.status(200)
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
+// ------------------------------------------------------------PORT_ROUTES----------------------------------------------------
+app.get('/getPort', async (req, res) => {
+  var JSON_RES = { data: {}, error: {} }
+  // Ensure the input fields exists and are not empty
+  if (req.query != undefined && req.query.username != undefined && req.query.token != undefined && req.query.portId != undefined) {
+
+    // Capture the input fields
+    const portId = req.query.portId;
+    const username = req.query.username
+    const token = req.query.token
+
+    const userInfo = await checkToken(username, token)
+
+    if (userInfo.isTokenValid) {
+      if (userInfo.userRole == USER_ADMIN_ROLE || userInfo.userRole == USER_READER_ROLE || userInfo.userRole == USER_SCAN_ROLE) {
+        // Select report
+        db.query('SELECT * FROM Ports WHERE port_id = ?', [portId], (error, results) => {
+          // If there is an issue with the query, output the error
+          if (error) throw error;
+
+          if (results.length > 0) {
+            JSON_RES.data = { port: results[0] }
+            res.status(200)
+          } else {
+            JSON_RES.error = { errorMsg: "Port not found" }
+            res.status(404)
+          }
+          res.json(JSON_RES);
+          res.end();
+        });
+      } else {
+        JSON_RES.error = { errorMsg: "User is not authorized" }
+        res.status(403)
+        res.json(JSON_RES);
+        res.end();
+      }
+    } else {
+      JSON_RES.error = { errorMsg: "Bad token" }
+      res.status(403)
+      res.json(JSON_RES);
+      res.end();
+    }
+
+  } else {
+    JSON_RES.error = { errorMsg: "Bad parameters" }
+    res.status(400)
+    res.json(JSON_RES);
+    res.end();
+  }
+
+});
 const PORT = process.env.PORT || 3000;
 
 https.createServer(httpsOptions, app).listen(PORT);
