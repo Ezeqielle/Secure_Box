@@ -1,5 +1,3 @@
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
 import { getFetch } from '../utils/functions';
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
@@ -7,31 +5,10 @@ import Alert from 'react-bootstrap/Alert';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from "react-router-dom";
 import Session from 'react-session-api'
+import PieChart from "./PieChart"
 import { BoxArrowUpRight, ArrowLeftCircle } from 'react-bootstrap-icons';
 
 Session.config(true, 60)
-
-ChartJS.register(ArcElement, Tooltip, Legend);
-
-let chartArcDatasets = [
-    {
-        label: 'Vulnerabilities',
-        data: [0, 0, 0, 0],
-        backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(255, 165, 0, 0.2)',
-            'rgba(135, 206, 235, 0.2)',
-            'rgba(144, 238, 144, 0.2)',
-        ],
-        borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(255, 165, 0, 1)',
-            'rgba(135, 206, 235, 1)',
-            'rgba(144, 238, 144, 1)',
-        ],
-        borderWidth: 1,
-    },
-]
 
 const Host = () => {
 
@@ -48,24 +25,27 @@ const Host = () => {
     const [hostPorts, setHostPorts] = useState([]);
     const [hostCVEsPorts, setHostCVEsPorts] = useState([]);
     const [showAlert, setShowAlert] = useState(false);
-    const [inputText, setInputText] = useState("");
-    let inputHandler = (e) => {
+    const [searchCVEs, setSearchCVEs] = useState("");
+    const [searchPorts, setSearchPorts] = useState("");
+    const [graphDataArc, setGraphDataArc] = useState([0,0,0,0]);
+
+    const searchCVEsHandler = (e) => {
         //convert input text to lower case
         var lowerCase = e.target.value.toLowerCase();
-        setInputText(lowerCase);
+        setSearchCVEs(lowerCase);
     };
 
-    const [graphDataArc, setGraphDataBar] = useState({
-        labels: ['Critical', 'High', 'Medium', 'Low'],
-        datasets: chartArcDatasets
-    });
+    const searchPortsHandler = (e) => {
+        //convert input text to lower case
+        var lowerCase = e.target.value.toLowerCase();
+        setSearchPorts(lowerCase);
+    };
 
     let { hostId } = useParams();
 
     const getPorts = async () => {
         let res = await getFetch({ username: Session.get("username"), token: Session.get("token"), hostId }, "/getHostPorts")
         setHostPorts(res.data.ports)
-        console.log(res.data)
         setHostPortsNum(res.data.ports.length)
     }
 
@@ -93,9 +73,7 @@ const Host = () => {
             }
             setHostPortsVulnarable(vulnarablePorts.length)
             setHostHighCVEsNum(hostCVEsCriticality[0] + hostCVEsCriticality[1])
-            chartArcDatasets[0].data = hostCVEsCriticality
-            //console.log(chartArcDatasets)
-            setGraphDataBar({ labels: ['Critical', 'High', 'Medium', 'Low'], datasets: chartArcDatasets })
+            setGraphDataArc(hostCVEsCriticality)
             setHostCVEsPorts(hostCVEs.data.cves)
         }
     }
@@ -257,32 +235,32 @@ const Host = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="table-responsive" style={{ height: "50vh" }}>
-                            <div className="row">
-                                <div className="col-md-6 text-nowrap">
-                                    <div
-                                        id="dataTable_length"
-                                        className="dataTables_length"
-                                        aria-controls="dataTable"
-                                    ></div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div
-                                        className="text-md-end dataTables_filter"
-                                        id="dataTable_filter"
-                                    >
-                                        <label className="form-label">
-                                            <input
-                                                type="search"
-                                                className="form-control form-control-sm"
-                                                aria-controls="dataTable"
-                                                onChange={inputHandler}
-                                                placeholder="Search"
-                                            />
-                                        </label>
-                                    </div>
+                        <div className="row">
+                            <div className="col-md-6 text-nowrap">
+                                <div
+                                    id="dataTable_length"
+                                    className="dataTables_length"
+                                    aria-controls="dataTable"
+                                ></div>
+                            </div>
+                            <div className="col-md-6">
+                                <div
+                                    className="text-md-end dataTables_filter"
+                                    id="dataTable_filter"
+                                >
+                                    <label className="form-label">
+                                        <input
+                                            type="search"
+                                            className="form-control form-control-sm"
+                                            aria-controls="dataTable"
+                                            onChange={searchCVEsHandler}
+                                            placeholder="Search"
+                                        />
+                                    </label>
                                 </div>
                             </div>
+                        </div>
+                        <div className="table-responsive" style={{ height: "50vh" }}>
                             <Table striped="columns" responsive="sm">
                                 <thead>
                                     <tr>
@@ -295,14 +273,18 @@ const Host = () => {
                                 </thead>
                                 <tbody>
                                     {hostCVEsPorts.filter(post => {
-                                        if (inputText === '') {
-                                            console.log(post);
+                                        if (searchCVEs === '') {
                                             return post;
-                                        } else if (post.cve_name.toLowerCase().includes(inputText)) {
+                                        } else if (post.cve_name.toLowerCase().includes(searchCVEs)) {
                                             return post;
-                                        } else if (post.service_name.toLowerCase().includes(inputText)) {
+                                        } else if (post.service_name.toLowerCase().includes(searchCVEs)) {
+                                            return post;
+                                        } else if (post.port_number.toString().toLowerCase().includes(searchCVEs)) {
+                                            return post;
+                                        } else if (post.cve_cvss.toString().toLowerCase().includes(searchCVEs)) {
                                             return post;
                                         }
+                                        
                                     }).map((cvePort, i) => (
                                         <tr key={i}>
                                             <td> {cvePort.cve_name}</td>
@@ -330,7 +312,7 @@ const Host = () => {
                             </div>
                         </div>
                         <div className="card-body">
-                            <div><Pie data={graphDataArc} /></div>
+                            <div><PieChart chartData={graphDataArc} /></div>
                         </div>
                     </div>
                 </div>
@@ -349,32 +331,33 @@ const Host = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="table-responsive" style={{ height: "50vh" }}>
-                            <div className="row">
-                                <div className="col-md-6 text-nowrap">
-                                    <div
-                                        id="dataTable_length"
-                                        className="dataTables_length"
-                                        aria-controls="dataTable"
-                                    ></div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div
-                                        className="text-md-end dataTables_filter"
-                                        id="dataTable_filter"
-                                    >
-                                        <label className="form-label">
-                                            <input
-                                                type="search"
-                                                className="form-control form-control-sm"
-                                                aria-controls="dataTable"
-                                                onChange={inputHandler}
-                                                placeholder="Search"
-                                            />
-                                        </label>
-                                    </div>
+                        <div className="row">
+                            <div className="col-md-6 text-nowrap">
+                                <div
+                                    id="dataTable_length"
+                                    className="dataTables_length"
+                                    aria-controls="dataTable"
+                                ></div>
+                            </div>
+                            <div className="col-md-6">
+                                <div
+                                    className="text-md-end dataTables_filter"
+                                    id="dataTable_filter"
+                                >
+                                    <label className="form-label">
+                                        <input
+                                            type="search"
+                                            className="form-control form-control-sm"
+                                            aria-controls="dataTable"
+                                            onChange={searchPortsHandler}
+                                            placeholder="Search"
+                                        />
+                                    </label>
                                 </div>
                             </div>
+                        </div>
+                        <div className="table-responsive" style={{ height: "50vh" }}>
+
                             <Table striped="columns" responsive="sm">
                                 <thead>
                                     <tr>
@@ -387,12 +370,15 @@ const Host = () => {
                                 </thead>
                                 <tbody>
                                     {hostPorts.filter(post => {
-                                        if (inputText === '') {
-                                            console.log(post);
+                                        if (searchPorts === '') {
                                             return post;
-                                        } else if (post.port_number.toLowerCase().includes(inputText)) {
+                                        } else if (post.port_number.toString().toLowerCase().includes(searchPorts)) {
                                             return post;
-                                        } else if (post.service_name.toLowerCase().includes(inputText)) {
+                                        } else if (post.service_name.toLowerCase().includes(searchPorts)) {
+                                            return post;
+                                        } else if (post.service_product.toLowerCase().includes(searchPorts)) {
+                                            return post;
+                                        } else if (post.port_protocol.toLowerCase().includes(searchPorts)) {
                                             return post;
                                         }
                                     }).map((port, i) => (

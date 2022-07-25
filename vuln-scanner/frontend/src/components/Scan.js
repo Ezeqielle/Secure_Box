@@ -1,5 +1,3 @@
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
 import { getFetch, postFetch } from '../utils/functions';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
@@ -9,30 +7,9 @@ import Session from 'react-session-api'
 import { BoxArrowUpRight, ArrowLeftCircle } from 'react-bootstrap-icons';
 import { SERVER_PORT } from '../utils/config';
 import { saveAs } from "file-saver";
+import PieChart from "./PieChart"
 
 Session.config(true, 60)
-
-ChartJS.register(ArcElement, Tooltip, Legend);
-
-let chartArcDatasets = [
-    {
-        label: 'Vulnerabilities',
-        data: [0, 0, 0, 0],
-        backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(255, 165, 0, 0.2)',
-            'rgba(135, 206, 235, 0.2)',
-            'rgba(144, 238, 144, 0.2)',
-        ],
-        borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(255, 165, 0, 1)',
-            'rgba(135, 206, 235, 1)',
-            'rgba(144, 238, 144, 1)',
-        ],
-        borderWidth: 1,
-    },
-]
 
 const Scan = () => {
 
@@ -51,10 +28,7 @@ const Scan = () => {
     const [scanHosts, setScanHosts] = useState([]);
     const [showAlert, setShowAlert] = useState(false);
 
-    const [graphDataArc, setGraphDataBar] = useState({
-        labels: ['Critical', 'High', 'Medium', 'Low'],
-        datasets: chartArcDatasets
-    });
+    const [graphDataArc, setGraphDataArc] = useState([0,0,0,0]);
 
     let { scanId } = useParams();
 
@@ -101,10 +75,9 @@ const Scan = () => {
             }
             setScanHostVulnarable(vulnarableHost.length)
             setScanHighCVEsNum(scanCVEsCriticality[0] + scanCVEsCriticality[1])
-            chartArcDatasets[0].data = scanCVEsCriticality
-            //console.log(chartArcDatasets)
-            setGraphDataBar({ labels: ['Critical', 'High', 'Medium', 'Low'], datasets: chartArcDatasets })
+            
         }
+        setGraphDataArc(scanCVEsCriticality)
     }
 
     const startScan = async () => {
@@ -319,7 +292,7 @@ const Scan = () => {
                             </div>
                         </div>
                         <div className="card-body">
-                            <div><Pie data={graphDataArc} /></div>
+                            <div><PieChart chartData={graphDataArc} /></div>
                         </div>
                     </div>
                 </div>

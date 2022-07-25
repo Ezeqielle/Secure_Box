@@ -50,10 +50,6 @@ const Navbar = () => (
             <i className="fas fa-window-maximize"></i>
             <span>All Projects</span>
           </Link>
-          <Link to="/vulnerability" className="nav-link">
-            <i className="fas fa-window-maximize"></i>
-            <span>Vulnerability</span>
-          </Link>
         </li>
       </ul>
       <div className="text-center d-none d-md-inline">
