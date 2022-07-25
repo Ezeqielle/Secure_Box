@@ -93,9 +93,6 @@ async function toCSV(scanId, db) {
             });
         }
     });
-
-
-
 };
 
 module.exports = { toCSV };

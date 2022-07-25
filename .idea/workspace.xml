@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c6a10510-09b9-491f-9201-42bafaa704ff" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vuln-scanner/backend/toCSV.js" beforeDir="false" afterPath="$PROJECT_DIR$/vuln-scanner/backend/toCSV.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
