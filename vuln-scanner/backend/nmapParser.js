@@ -70,7 +70,7 @@ function json2db(scanId, db) {
                 }
 
                 if (target[i].os !== undefined) {
-                    let host_os = target[i].os.osmatch['@_name'];
+                    host_os = target[i].os.osmatch['@_name'];
                     host_os = host_os.split(' ');
                     host_os = host_os[0];
                 }
