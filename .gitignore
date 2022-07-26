@@ -9,3 +9,4 @@ test*
 vuln-scanner/backend/*.json
 vuln-scanner/backend/*.xml
 vuls-logs/*
+.idea/*
