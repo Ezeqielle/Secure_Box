@@ -76,7 +76,7 @@ async function toCSV(scanId, db) {
         if (error) throw error;
         if (result.length > 0) {
             cve2csv(scanId, db, ws)
-        } else if (result.length < 0) {
+        } else {
             db.query("SELECT h.host_ip, h.host_name, p.port_number, p.service_name, p.service_version FROM Ports AS p INNER JOIN Hosts AS h on p.host_id = h.host_id WHERE scan_id = ?", [scanId] , function(error, result, fields) {
                 if (error) throw error;
                 if (result.length > 0) {
