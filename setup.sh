@@ -7,4 +7,4 @@ echo REACT_APP_HOST_IP=$(ip route get 1.2.3.4 | awk '{print $7}') > vuln-scanner
 
 git clone https://github.com/cve-search/CVE-Search-Docker.git
 
-docker-compose up
+docker-compose up --build
